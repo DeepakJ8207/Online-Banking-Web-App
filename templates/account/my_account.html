@@ -1,0 +1,99 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}My Accounts — PRIME RESERVE BANK{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid p-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold text-prm-navy mb-1 font-heading">My Bank Accounts</h4>
+            <p class="text-secondary small mb-0">Overview of all active savings, current, and deposit accounts</p>
+        </div>
+        <div>
+            <a href="{% url 'transfers:self_transfer' %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                <i class="bi bi-arrow-left-right me-1"></i> Self Transfer
+            </a>
+        </div>
+    </div>
+
+    <!-- Customer Profile Quick Card -->
+    <div class="card card-prm p-4 mb-4 bg-white">
+        <div class="row align-items-center g-4">
+            <div class="col-md-7 d-flex align-items-center gap-3">
+                <div class="bg-prm-navy text-white rounded-circle d-flex align-items-center justify-content-center fw-bold fs-4" style="width: 64px; height: 64px; flex-shrink: 0;">
+                    {{ user.first_name|default:user.username|first|upper }}
+                </div>
+                <div>
+                    <h5 class="fw-bold text-prm-navy mb-1">{{ user.get_full_name|default:user.username }}</h5>
+                    <div class="text-muted small mb-1">
+                        CIF / Customer ID: <strong class="text-dark">{{ profile.cif_number|default:"98765432101" }}</strong>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                        <span class="badge bg-success-subtle text-success"><i class="bi bi-check-circle-fill me-1"></i> KYC {{ profile.kyc_status }}</span>
+                        <span class="badge bg-primary-subtle text-primary">NetBanking Active</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5 border-start-md ps-md-4">
+                <div class="small text-secondary mb-1"><i class="bi bi-telephone me-2"></i> Registered Mobile: <b>{{ profile.masked_phone }}</b></div>
+                <div class="small text-secondary mb-1"><i class="bi bi-envelope me-2"></i> Registered Email: <b>{{ user.email }}</b></div>
+                <div class="small text-secondary"><i class="bi bi-geo-alt me-2"></i> Address: <b>{{ profile.city }}, {{ profile.state }}</b></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accounts Grid -->
+    <h5 class="fw-bold text-prm-navy mb-3">Active Account List</h5>
+    <div class="row g-4 mb-4">
+        {% for acc in accounts %}
+            <div class="col-lg-6">
+                <div class="card card-prm p-4 h-100 position-relative overflow-hidden">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="badge {% if acc.account_type == 'SAVINGS' %}bg-primary-subtle text-primary{% elif acc.account_type == 'CURRENT' %}bg-warning-subtle text-warning{% else %}bg-success-subtle text-success{% endif %} fw-bold mb-1">
+                                {{ acc.get_account_type_display }}
+                            </span>
+                            <h5 class="fw-bold text-prm-navy font-monospace mb-0">{{ acc.masked_account_number }}</h5>
+                        </div>
+                        <span class="badge bg-success-subtle text-success"><i class="bi bi-check-circle me-1"></i> {{ acc.get_status_display }}</span>
+                    </div>
+
+                    <div class="my-3 p-3 bg-light rounded-3">
+                        <div class="small text-secondary mb-1">Available Balance</div>
+                        <div class="display-6 fw-bold text-prm-navy font-heading">₹{{ acc.balance|intcomma }}</div>
+                    </div>
+
+                    <div class="row g-2 small text-secondary mb-4">
+                        <div class="col-6">
+                            <div>Branch: <strong class="text-prm-navy">{{ acc.branch.branch_name }}</strong></div>
+                            <div>IFSC: <strong class="text-prm-navy font-monospace">{{ acc.branch.ifsc_code }}</strong></div>
+                        </div>
+                        <div class="col-6">
+                            <div>Nominee: <strong class="text-prm-navy">{{ acc.nominee_name|default:"Not Assigned" }}</strong></div>
+                            <div>Opened: <strong class="text-prm-navy">{{ acc.opening_date|date:"d M Y" }}</strong></div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 pt-3 border-top">
+                        <a href="{% url 'banking:account_details' acc.id %}" class="btn btn-sm btn-prm-primary rounded-pill px-3">
+                            <i class="bi bi-eye-fill me-1"></i> View Account
+                        </a>
+                        <a href="{% url 'transactions:download_statement' %}?account_id={{ acc.id }}" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                            <i class="bi bi-file-earmark-pdf-fill me-1"></i> Statement PDF
+                        </a>
+                        <a href="{% url 'banking:change_pin' acc.id %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                            <i class="bi bi-key-fill me-1"></i> Change PIN
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5 text-muted">
+                No bank accounts found.
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

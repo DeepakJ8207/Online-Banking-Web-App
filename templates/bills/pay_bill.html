@@ -1,0 +1,65 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+
+{% block title %}Pay Bill — {% if category %}{{ category.name }}{% else %}Utilities{% endif %} — PRIME RESERVE BANK{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid p-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a href="{% url 'bills:home' %}" class="btn btn-sm btn-light rounded-pill px-3 mb-2">
+                <i class="bi bi-arrow-left me-1"></i> Back to Bills
+            </a>
+            <h4 class="fw-bold text-prm-navy mb-1 font-heading">
+                Pay {% if category %}{{ category.name }}{% else %}Utility Bill / Recharge{% endif %}
+            </h4>
+            <p class="text-secondary small mb-0">Instant simulated payment with digital receipt generation</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card card-prm p-4 p-md-5 bg-white">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="source-account" class="form-label small fw-bold text-prm-navy">Debit Account</label>
+                        {{ form.source_account }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="biller-select" class="form-label small fw-bold text-prm-navy">Select Biller / Service Provider</label>
+                        {{ form.biller }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="consumer-number" class="form-label small fw-bold text-prm-navy">Consumer ID / Account / Mobile No.</label>
+                        {{ form.consumer_number }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="bill-amount" class="form-label small fw-bold text-prm-navy">Bill Amount (₹)</label>
+                        {{ form.amount }}
+                    </div>
+
+                    <div class="mb-4 p-3 bg-light rounded-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label for="bill-pin" class="form-label small fw-bold text-prm-navy mb-0">Transaction PIN</label>
+                            <small class="text-muted">Demo PIN: <b>1234</b></small>
+                        </div>
+                        {{ form.transaction_pin }}
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'bills:home' %}" class="btn btn-light rounded-pill px-4">Cancel</a>
+                        <button type="submit" class="btn btn-prm-primary rounded-pill px-5 shadow-sm">
+                            <i class="bi bi-check-circle-fill me-1"></i> Pay Bill
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

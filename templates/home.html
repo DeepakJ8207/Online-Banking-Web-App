@@ -1,0 +1,580 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/landing.css' %}">
+{% endblock %}
+
+{% block layout %}
+<!-- Public Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-prm-dark sticky-top py-3 border-bottom border-secondary-subtle">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'accounts:home' %}">
+            <div class="bg-warning text-dark rounded-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px;">
+                <i class="bi bi-bank2 fs-5"></i>
+            </div>
+            <div>
+                <span class="font-heading fw-bold fs-5 tracking-wide text-white">PRIME RESERVE BANK</span>
+                <span class="d-block text-white-50 small" style="font-size: 0.68rem; letter-spacing: 0.05em;">DIGITAL BANKING SYSTEM</span>
+            </div>
+        </a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarMain">
+            <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-3">
+                <li class="nav-item"><a class="nav-link active" href="#home">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="#services">Services</a></li>
+                <li class="nav-item"><a class="nav-link" href="#security">Security</a></li>
+                <li class="nav-item"><a class="nav-link" href="#calculators">Calculators</a></li>
+                <li class="nav-item"><a class="nav-link" href="#faq">FAQ</a></li>
+                <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+            </ul>
+            <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
+                <a href="{% url 'accounts:login' %}" class="btn btn-outline-light rounded-pill px-3 py-2 fw-semibold small">
+                    <i class="bi bi-lock-fill me-1"></i> NetBanking Login
+                </a>
+                <a href="{% url 'accounts:register' %}" class="btn btn-prm-primary rounded-pill px-3 py-2 fw-semibold small">
+                    Register Now
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section id="home" class="hero-section">
+    <div class="container position-relative" style="z-index: 2;">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-7">
+                <div class="hero-badge mb-3">
+                    <i class="bi bi-patch-check-fill text-warning"></i>
+                    <span>Next-Gen Indian Digital Banking Experience</span>
+                </div>
+                <h1 class="hero-title mb-3">Banking Made Simple, Secure & Smarter.</h1>
+                <p class="hero-subtitle mb-4">
+                    Manage your accounts, transfer funds instantly, pay utility bills, explore low-interest loans, and track your complete financial health from one unified digital banking platform.
+                </p>
+                <div class="d-flex flex-wrap gap-3 mb-4">
+                    <a href="{% url 'accounts:login' %}" class="btn btn-warning btn-lg rounded-pill px-4 shadow fw-bold text-dark">
+                        <i class="bi bi-box-arrow-in-right me-2"></i> Open Customer NetBanking
+                    </a>
+                    <a href="{% url 'dashboard:admin_overview' %}" class="btn btn-outline-light btn-lg rounded-pill px-4">
+                        <i class="bi bi-shield-shaded me-2 text-warning"></i> Bank Manager Overview
+                    </a>
+                </div>
+
+                <!-- Instant Demo Quick Test Bar -->
+                <div class="p-3 rounded-4 mb-4" style="background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.15);">
+                    <div class="small fw-bold text-warning mb-2"><i class="bi bi-lightning-charge-fill"></i> Instant Test Logins (1-Click Ready):</div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{% url 'accounts:login' %}" class="badge bg-primary text-white text-decoration-none px-2 py-1">👤 Customer: demo_user (₹1,25,450)</a>
+                        <a href="{% url 'accounts:login' %}" class="badge bg-info text-dark text-decoration-none px-2 py-1">👤 Customer: priya_sharma (₹85,200)</a>
+                        <a href="{% url 'accounts:login' %}" class="badge bg-secondary text-white text-decoration-none px-2 py-1">👤 Customer: rahul_verma (₹62,750)</a>
+                        <a href="{% url 'accounts:login' %}" class="badge bg-warning text-dark text-decoration-none px-2 py-1">🛡️ Admin: admin</a>
+                    </div>
+                </div>
+
+                <!-- Trust Badges -->
+                <div class="row g-3 pt-3 border-top border-secondary text-white-50">
+                    <div class="col-sm-4 d-flex align-items-center gap-2">
+                        <i class="bi bi-shield-lock-fill text-success fs-4"></i>
+                        <small class="text-white">Double-Entry Atomic Ledger</small>
+                    </div>
+                    <div class="col-sm-4 d-flex align-items-center gap-2">
+                        <i class="bi bi-qr-code-scan text-info fs-4"></i>
+                        <small class="text-white">Simulated UPI & QR Pay</small>
+                    </div>
+                    <div class="col-sm-4 d-flex align-items-center gap-2">
+                        <i class="bi bi-file-earmark-pdf-fill text-danger fs-4"></i>
+                        <small class="text-white">ReportLab PDF Statements</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <!-- Interactive Preview Banking Card -->
+                <div class="bank-debit-card mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <span class="font-heading fw-bold fs-5 tracking-wider text-warning">PRIME RESERVE BANK</span>
+                        <i class="bi bi-wifi fs-4 text-white-50"></i>
+                    </div>
+                    <div class="my-4">
+                        <div class="small text-white-50 mb-1">Total Available Balance</div>
+                        <div class="font-heading fw-bold display-6 text-white">₹1,25,450.00</div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-end pt-3 border-top border-white-50">
+                        <div>
+                            <div class="text-white-50 small" style="font-size: 0.68rem;">ACCOUNT HOLDER</div>
+                            <div class="fw-semibold text-white">Aarav Sharma</div>
+                            <div class="font-monospace text-white-50 small">XXXX XXXX 0045</div>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-warning text-dark px-3 py-1 fw-bold">PLATINUM</span>
+                            <div class="text-white-50 small mt-1 font-monospace">IFSC: PRMB0001001</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Demo Quick Access Pill -->
+                <div class="card bg-white text-dark rounded-4 p-3 shadow-lg border-0">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-success-subtle text-success fw-bold">Demo Mode Ready</span>
+                        <small class="text-muted">Instant Access</small>
+                    </div>
+                    <p class="small text-secondary mb-2">Test all features with pre-seeded demo user:</p>
+                    <div class="bg-light p-2 rounded-3 small font-monospace d-flex justify-content-between align-items-center">
+                        <div>User: <b>demo_user</b> | Pwd: <b>Demo@12345</b></div>
+                        <a href="{% url 'accounts:login' %}" class="btn btn-sm btn-dark rounded-pill px-2 py-0">Try</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Banking Services -->
+<section id="services" class="py-5 bg-white">
+    <div class="container py-4">
+        <div class="text-center max-w-700 mx-auto mb-5">
+            <span class="badge bg-primary-subtle text-primary fw-bold px-3 py-2 rounded-pill mb-2">COMPREHENSIVE SUITE</span>
+            <h2 class="display-6 fw-bold text-prm-navy">Complete Digital Banking Solutions</h2>
+            <p class="text-secondary">Everything you need to handle payments, transfers, utilities, savings, and investments.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4">
+                <div class="service-card">
+                    <div class="service-icon-box bg-primary-subtle text-primary">
+                        <i class="bi bi-wallet2"></i>
+                    </div>
+                    <h5 class="fw-bold text-prm-navy mb-2">Account Management</h5>
+                    <p class="text-secondary small mb-0">View real-time balances, manage multi-tier savings & current accounts, check CIF numbers, IFSC codes, and download official PDF statements.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="service-card">
+                    <div class="service-icon-box bg-success-subtle text-success">
+                        <i class="bi bi-arrow-left-right"></i>
+                    </div>
+                    <h5 class="fw-bold text-prm-navy mb-2">Instant Funds Transfer</h5>
+                    <p class="text-secondary small mb-0">Transfer funds securely via simulated IMPS/NEFT, Mobile number quick pay, and inter-account self transfer with atomic double-entry balance verification.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="service-card">
+                    <div class="service-icon-box bg-warning-subtle text-warning">
+                        <i class="bi bi-qr-code-scan"></i>
+                    </div>
+                    <h5 class="fw-bold text-prm-navy mb-2">Simulated UPI & QR Pay</h5>
+                    <p class="text-secondary small mb-0">Create custom UPI Virtual Payment Addresses (e.g. <code>user@primereserve</code>), generate personal dynamic QR codes, and pay with UPI PIN authentication.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="service-card">
+                    <div class="service-icon-box bg-danger-subtle text-danger">
+                        <i class="bi bi-receipt-cutoff"></i>
+                    </div>
+                    <h5 class="fw-bold text-prm-navy mb-2">Utility Bills & Recharge</h5>
+                    <p class="text-secondary small mb-0">Simulate payments for Electricity (Tata Power, Adani), Mobile recharges (Jio, Airtel), Municipal Water, Piped Gas, and High-Speed Broadband with instant receipts.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="service-card">
+                    <div class="service-icon-box bg-info-subtle text-info">
+                        <i class="bi bi-cash-coin"></i>
+                    </div>
+                    <h5 class="fw-bold text-prm-navy mb-2">Loans & EMI Management</h5>
+                    <p class="text-secondary small mb-0">Explore Personal, Home, Auto, and Education loan products. Apply online for instant disbursal, track repayment schedules, and pay monthly EMIs.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="service-card">
+                    <div class="service-icon-box bg-secondary-subtle text-dark">
+                        <i class="bi bi-piggy-bank"></i>
+                    </div>
+                    <h5 class="fw-bold text-prm-navy mb-2">Fixed & Recurring Deposits</h5>
+                    <p class="text-secondary small mb-0">Grow your wealth with high-interest Fixed Deposits (up to 7.50% p.a.) and disciplined Recurring Deposits with automatic interest compounding calculation.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Security Highlights Section -->
+<section id="security" class="py-5 bg-light">
+    <div class="container py-4">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <span class="badge bg-success-subtle text-success fw-bold px-3 py-2 rounded-pill mb-2">BANK-GRADE SECURITY</span>
+                <h2 class="display-6 fw-bold text-prm-navy mb-4">Engineered with Multi-Layer Security Architecture</h2>
+                <p class="text-secondary mb-4">PRIME RESERVE BANK implements industry-standard cybersecurity and defensive software engineering practices:</p>
+
+                <div class="security-feature-item">
+                    <div class="security-icon-circle"><i class="bi bi-key-fill"></i></div>
+                    <div>
+                        <h6 class="fw-bold text-prm-navy mb-1">Strong Cryptographic Hashing</h6>
+                        <p class="text-secondary small mb-0">Passwords and Transaction PINs are hashed using PBKDF2 with SHA-256 and salted. No plain-text credentials are ever stored.</p>
+                    </div>
+                </div>
+
+                <div class="security-feature-item">
+                    <div class="security-icon-circle"><i class="bi bi-shield-check"></i></div>
+                    <div>
+                        <h6 class="fw-bold text-prm-navy mb-1">Database Transaction Atomicity</h6>
+                        <p class="text-secondary small mb-0">All balance debits and credits execute inside strict <code>transaction.atomic()</code> blocks with row locks (<code>select_for_update()</code>) preventing double spending.</p>
+                    </div>
+                </div>
+
+                <div class="security-feature-item">
+                    <div class="security-icon-circle"><i class="bi bi-cpu-fill"></i></div>
+                    <div>
+                        <h6 class="fw-bold text-prm-navy mb-1">Rate Limiting & Lockout Protection</h6>
+                        <p class="text-secondary small mb-0">Automatic account lockout after 5 consecutive failed login attempts, preventing brute-force dictionary attacks.</p>
+                    </div>
+                </div>
+
+                <div class="security-feature-item">
+                    <div class="security-icon-circle"><i class="bi bi-journal-check"></i></div>
+                    <div>
+                        <h6 class="fw-bold text-prm-navy mb-1">Full Audit Logging Trail</h6>
+                        <p class="text-secondary small mb-0">Comprehensive tracking of every login, logout, transfer, password change, and bill payment with timestamp and client IP.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-lg p-4 p-md-5 rounded-4 bg-prm-navy text-white">
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="bg-success text-white rounded-circle p-3 d-flex align-items-center justify-content-center">
+                            <i class="bi bi-shield-lock fs-3"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0">PRMB Security Shield</h5>
+                            <small class="text-white-50">Active Defense Framework</small>
+                        </div>
+                    </div>
+                    <ul class="list-unstyled d-flex flex-column gap-3 mb-4 small text-white-50">
+                        <li class="d-flex align-items-center gap-2"><i class="bi bi-check2-circle text-success fs-5"></i> Django CSRF & XSS Token Validation on all forms</li>
+                        <li class="d-flex align-items-center gap-2"><i class="bi bi-check2-circle text-success fs-5"></i> SQL Injection immunity via Django ORM parameterization</li>
+                        <li class="d-flex align-items-center gap-2"><i class="bi bi-check2-circle text-success fs-5"></i> Strict user isolation: No cross-account data leakage</li>
+                        <li class="d-flex align-items-center gap-2"><i class="bi bi-check2-circle text-success fs-5"></i> 30-minute auto session timeout for inactive sessions</li>
+                    </ul>
+                    <a href="{% url 'accounts:register' %}" class="btn btn-warning rounded-pill fw-bold text-dark w-100 py-2">
+                        Get Started with Secure Banking
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Interactive Live Financial Calculators Preview -->
+<section id="calculators" class="py-5 bg-white">
+    <div class="container py-4">
+        <div class="text-center max-w-700 mx-auto mb-5">
+            <span class="badge bg-warning-subtle text-warning fw-bold px-3 py-2 rounded-pill mb-2">SMART PLANNING</span>
+            <h2 class="display-6 fw-bold text-prm-navy">Interactive Financial Calculators</h2>
+            <p class="text-secondary">Plan your home loans, car loans, fixed deposits, and wealth creation with real-time math.</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- EMI Calculator Card -->
+            <div class="col-lg-6">
+                <div class="card card-prm p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold text-prm-navy mb-0"><i class="bi bi-calculator-fill text-primary me-2"></i> Quick Loan EMI Calculator</h5>
+                        <a href="{% url 'finance:emi_calculator' %}" class="btn btn-sm btn-outline-primary rounded-pill">Full View</a>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Loan Amount: <span id="emiAmountDisplay" class="text-primary fw-bold">₹5,00,000</span></label>
+                        <input type="range" class="form-range" id="emiAmountSlider" min="50000" max="5000000" step="25000" value="500000">
+                        <input type="hidden" id="emiAmountInput" value="500000">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Interest Rate: <span id="emiRateDisplay" class="text-primary fw-bold">9.5%</span></label>
+                        <input type="range" class="form-range" id="emiRateSlider" min="5" max="20" step="0.25" value="9.5">
+                        <input type="hidden" id="emiRateInput" value="9.5">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small fw-semibold">Tenure: <span id="emiTenureDisplay" class="text-primary fw-bold">36 Months</span></label>
+                        <input type="range" class="form-range" id="emiTenureSlider" min="6" max="120" step="6" value="36">
+                        <input type="hidden" id="emiTenureInput" value="36">
+                    </div>
+                    <div class="p-3 bg-light rounded-3 text-center">
+                        <div class="small text-muted mb-1">Estimated Monthly EMI</div>
+                        <div id="emiMonthlyResult" class="display-6 fw-bold text-prm-navy">₹16,016</div>
+                        <div class="d-flex justify-content-around mt-3 pt-2 border-top small">
+                            <div>Total Interest: <span id="emiTotalInterest" class="fw-bold text-warning">₹76,576</span></div>
+                            <div>Total Payable: <span id="emiTotalPayable" class="fw-bold text-primary">₹5,76,576</span></div>
+                        </div>
+                    </div>
+                    <span id="emiPrincipalDisplay" class="d-none">500000</span>
+                </div>
+            </div>
+
+            <!-- Quick Links to all 4 calculators -->
+            <div class="col-lg-6">
+                <div class="row g-3 h-100">
+                    <div class="col-sm-6">
+                        <a href="{% url 'finance:emi_calculator' %}" class="card card-prm p-4 text-decoration-none h-100 card-prm-hover">
+                            <i class="bi bi-house-door-fill fs-2 text-primary mb-3"></i>
+                            <h6 class="fw-bold text-prm-navy mb-1">Loan EMI Calculator</h6>
+                            <p class="text-secondary small mb-0">Calculate monthly repayments for Home, Auto & Personal loans.</p>
+                        </a>
+                    </div>
+                    <div class="col-sm-6">
+                        <a href="{% url 'finance:fd_calculator' %}" class="card card-prm p-4 text-decoration-none h-100 card-prm-hover">
+                            <i class="bi bi-piggy-bank-fill fs-2 text-success mb-3"></i>
+                            <h6 class="fw-bold text-prm-navy mb-1">FD Calculator</h6>
+                            <p class="text-secondary small mb-0">Estimate maturity amount and quarterly compounded interest on deposits.</p>
+                        </a>
+                    </div>
+                    <div class="col-sm-6">
+                        <a href="{% url 'finance:rd_calculator' %}" class="card card-prm p-4 text-decoration-none h-100 card-prm-hover">
+                            <i class="bi bi-calendar2-week-fill fs-2 text-warning mb-3"></i>
+                            <h6 class="fw-bold text-prm-navy mb-1">RD Calculator</h6>
+                            <p class="text-secondary small mb-0">Plan recurring monthly savings and projected interest accumulation.</p>
+                        </a>
+                    </div>
+                    <div class="col-sm-6">
+                        <a href="{% url 'finance:sip_calculator' %}" class="card card-prm p-4 text-decoration-none h-100 card-prm-hover">
+                            <i class="bi bi-graph-up-arrow fs-2 text-danger mb-3"></i>
+                            <h6 class="fw-bold text-prm-navy mb-1">SIP Calculator</h6>
+                            <p class="text-secondary small mb-0">Simulate long-term systematic wealth creation through mutual funds.</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Demonstration Statistics (Fictional Values Clearly Marked) -->
+<section class="py-5 bg-prm-gradient text-white">
+    <div class="container py-3">
+        <div class="text-center mb-4">
+            <span class="badge bg-white text-dark fw-bold px-3 py-1 rounded-pill mb-2">DEMO BENCHMARKS</span>
+            <h3 class="fw-bold">Simulated Platform Metrics</h3>
+            <small class="text-white-50">Educational demonstration parameters</small>
+        </div>
+        <div class="row g-4 text-center">
+            <div class="col-6 col-md-3">
+                <div class="stats-counter text-warning">₹50M+</div>
+                <div class="small text-white-50 mt-1">Simulated Volume Processed</div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stats-counter text-warning">10,000+</div>
+                <div class="small text-white-50 mt-1">Simulated Customer Accounts</div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stats-counter text-warning">99.99%</div>
+                <div class="small text-white-50 mt-1">Simulated System Uptime</div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stats-counter text-warning">₹0.00</div>
+                <div class="small text-white-50 mt-1">Real Money Risk (Zero)</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Frequently Asked Questions (FAQ) -->
+<section id="faq" class="py-5 bg-light">
+    <div class="container py-4">
+        <div class="text-center max-w-700 mx-auto mb-5">
+            <span class="badge bg-primary-subtle text-primary fw-bold px-3 py-2 rounded-pill mb-2">COMMON QUESTIONS</span>
+            <h2 class="display-6 fw-bold text-prm-navy">Frequently Asked Questions</h2>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="accordion accordion-flush shadow-sm rounded-4 overflow-hidden" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button fw-semibold text-prm-navy" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                Is this a real banking service connected to the banking network?
+                            </button>
+                        </h2>
+                        <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-secondary small">
+                                <b>No.</b> PRIME RESERVE BANK is strictly an educational college project created to demonstrate full-stack software architecture, double-entry ledger transactions, security best practices, and user experience design. No real bank accounts, real UPI networks (NPCI), or real-money payment gateways are connected.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed fw-semibold text-prm-navy" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                How does the OTP verification work without paid SMS gateways?
+                            </button>
+                        </h2>
+                        <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-secondary small">
+                                The application implements a pluggable OTP service layer. In demonstration mode, the generated 6-digit OTP is conveniently displayed in an on-screen alert box and logged to the server console, allowing instant seamless testing without requiring paid third-party SMS APIs.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed fw-semibold text-prm-navy" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                How are financial transactions recorded and balances protected?
+                            </button>
+                        </h2>
+                        <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-secondary small">
+                                Every fund transfer executes inside a database transaction (<code>transaction.atomic()</code>) using <code>select_for_update()</code> to lock sender and receiver accounts, verify available balance, debit sender, credit receiver, and create immutable ledger records. If any error occurs, the entire transaction rolls back automatically.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed fw-semibold text-prm-navy" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                Can I download official PDF statements for my transactions?
+                            </button>
+                        </h2>
+                        <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-secondary small">
+                                Yes! The application uses Python's <b>ReportLab</b> library to dynamically compile professional PDF account statements complete with bank header, account metadata, period summaries, and detailed credit/debit transaction records.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section id="contact" class="py-5 bg-white">
+    <div class="container py-4">
+        <div class="row g-5 align-items-center">
+            <div class="col-lg-5">
+                <span class="badge bg-primary-subtle text-primary fw-bold px-3 py-2 rounded-pill mb-2">GET IN TOUCH</span>
+                <h2 class="display-6 fw-bold text-prm-navy mb-3">Prime Reserve Bank Helpdesk</h2>
+                <p class="text-secondary mb-4">Have questions about this educational demonstration or digital banking architecture? Our virtual team is here to help.</p>
+
+                <div class="d-flex flex-column gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-light p-3 rounded-circle text-primary fs-5"><i class="bi bi-geo-alt-fill"></i></div>
+                        <div>
+                            <div class="fw-bold text-prm-navy small">Central Headquarters</div>
+                            <small class="text-muted">12, Reserve Bank Marg, Fort, Mumbai - 400001</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-light p-3 rounded-circle text-primary fs-5"><i class="bi bi-telephone-fill"></i></div>
+                        <div>
+                            <div class="fw-bold text-prm-navy small">Toll-Free Support Line</div>
+                            <small class="text-muted">1800-200-PRMB (1800-200-7762)</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-light p-3 rounded-circle text-primary fs-5"><i class="bi bi-envelope-fill"></i></div>
+                        <div>
+                            <div class="fw-bold text-prm-navy small">Support Email</div>
+                            <small class="text-muted">support@primereservebank.demo</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="card card-prm p-4 p-md-5">
+                    <h5 class="fw-bold text-prm-navy mb-3">Send Us a Message</h5>
+                    <form onsubmit="event.preventDefault(); showToast('Demo message received! Thank you for contacting Prime Reserve Bank.', 'success'); this.reset();">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Your Full Name</label>
+                                <input type="text" class="form-control" placeholder="e.g. Aarav Sharma" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Email Address</label>
+                                <input type="email" class="form-control" placeholder="name@email.com" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold">Subject</label>
+                                <input type="text" class="form-control" placeholder="Inquiry about Internet Banking" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold">Message</label>
+                                <textarea class="form-control" rows="4" placeholder="Type your query or feedback here..." required></textarea>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-prm-primary rounded-pill px-4">
+                                    <i class="bi bi-send-fill me-1"></i> Send Inquiry
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-prm-dark text-white pt-5 pb-4 border-top border-secondary">
+    <div class="container">
+        <div class="row g-4 mb-5">
+            <div class="col-lg-4">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="bg-warning text-dark rounded-3 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+                        <i class="bi bi-bank2 fs-5"></i>
+                    </div>
+                    <span class="font-heading fw-bold fs-5 tracking-wide text-white">PRIME RESERVE BANK</span>
+                </div>
+                <p class="text-white-50 small mb-3">
+                    "Banking Made Simple, Secure & Smarter."<br/>
+                    A comprehensive full-stack digital banking web application built with Python, Django, MySQL, Bootstrap 5, Chart.js, and ReportLab.
+                </p>
+                <div class="badge bg-warning text-dark px-3 py-2 fw-bold">Educational Demonstration Project</div>
+            </div>
+
+            <div class="col-6 col-lg-2">
+                <h6 class="fw-bold text-white mb-3 font-heading">Core Banking</h6>
+                <ul class="list-unstyled d-flex flex-column gap-2 small text-white-50">
+                    <li><a href="{% url 'accounts:login' %}" class="text-white-50 text-decoration-none">NetBanking Login</a></li>
+                    <li><a href="{% url 'accounts:register' %}" class="text-white-50 text-decoration-none">Register Account</a></li>
+                    <li><a href="{% url 'accounts:forgot_password' %}" class="text-white-50 text-decoration-none">Forgot Password</a></li>
+                    <li><a href="#services" class="text-white-50 text-decoration-none">Banking Services</a></li>
+                </ul>
+            </div>
+
+            <div class="col-6 col-lg-2">
+                <h6 class="fw-bold text-white mb-3 font-heading">Calculators</h6>
+                <ul class="list-unstyled d-flex flex-column gap-2 small text-white-50">
+                    <li><a href="{% url 'finance:emi_calculator' %}" class="text-white-50 text-decoration-none">EMI Calculator</a></li>
+                    <li><a href="{% url 'finance:fd_calculator' %}" class="text-white-50 text-decoration-none">FD Calculator</a></li>
+                    <li><a href="{% url 'finance:rd_calculator' %}" class="text-white-50 text-decoration-none">RD Calculator</a></li>
+                    <li><a href="{% url 'finance:sip_calculator' %}" class="text-white-50 text-decoration-none">SIP Calculator</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-4">
+                <h6 class="fw-bold text-white mb-3 font-heading">Educational Disclaimer</h6>
+                <p class="text-white-50 small mb-2">
+                    This website is an academic / college project. It does not connect to any real bank, real UPI system, or payment gateway. All monetary transactions are simulated and stored in the application database.
+                </p>
+                <div class="font-monospace small text-warning">PRMB IFSC Prefix: PRMB0001001</div>
+            </div>
+        </div>
+
+        <div class="pt-4 border-top border-secondary text-center text-white-50 small">
+            <p class="mb-1">© 2026 PRIME RESERVE BANK. All Rights Reserved. Designed for College Academic Evaluation.</p>
+            <p class="mb-0 text-white-50" style="font-size: 0.72rem;">Built with Python • Django • MySQL • Bootstrap 5 • Chart.js • ReportLab</p>
+        </div>
+    </div>
+</footer>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/calculators.js' %}"></script>
+{% endblock %}

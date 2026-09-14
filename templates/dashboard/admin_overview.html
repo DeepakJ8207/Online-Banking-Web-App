@@ -1,0 +1,854 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Admin & Bank Manager Portal — PRIME RESERVE BANK{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-wrapper {
+        display: flex;
+        min-height: 100vh;
+        background-color: #f1f5f9;
+    }
+    .admin-sidebar {
+        width: 270px;
+        background: linear-gradient(180deg, #061122 0%, #0a192f 50%, #0d2346 100%);
+        color: #94a3b8;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid rgba(255, 255, 255, 0.08);
+        z-index: 1040;
+    }
+    .admin-main {
+        flex-grow: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+    }
+    .admin-topbar {
+        height: 70px;
+        background: #ffffff;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 2rem;
+        position: sticky;
+        top: 0;
+        z-index: 1020;
+    }
+    .admin-content {
+        padding: 2rem;
+        flex-grow: 1;
+    }
+    .kpi-card-admin {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .kpi-card-admin:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    }
+    .kpi-icon-box {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+    .admin-nav-link {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        padding: 0.75rem 1rem;
+        color: #cbd5e1;
+        text-decoration: none;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        margin-bottom: 0.25rem;
+        cursor: pointer;
+    }
+    .admin-nav-link:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: #ffffff;
+    }
+    .admin-nav-link.active {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        color: #ffffff;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+    }
+    .table-custom-admin th {
+        background-color: #f8fafc;
+        color: #475569;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-weight: 700;
+        padding: 0.9rem 1rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .table-custom-admin td {
+        padding: 0.9rem 1rem;
+        vertical-align: middle;
+        font-size: 0.88rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .table-custom-admin tr:hover td {
+        background-color: #f8fafc;
+    }
+    @media (max-width: 991.98px) {
+        .admin-sidebar { display: none; }
+        .admin-topbar { padding: 0 1rem; }
+        .admin-content { padding: 1.25rem 1rem; }
+    }
+</style>
+{% endblock %}
+
+{% block layout %}
+<div class="admin-wrapper">
+
+    <!-- Custom Admin Sidebar -->
+    <aside class="admin-sidebar">
+        <!-- Brand Header -->
+        <div class="p-4 border-bottom border-white-50 border-opacity-10 d-flex align-items-center gap-3">
+            <div class="bg-warning text-dark rounded-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 42px; height: 42px; flex-shrink: 0;">
+                <i class="bi bi-shield-shaded fs-4"></i>
+            </div>
+            <div>
+                <div class="fw-bold text-white font-heading fs-6 tracking-wide">PRIME RESERVE</div>
+                <div class="text-warning small fw-semibold" style="font-size: 0.68rem; letter-spacing: 0.08em;">ADMIN CONTROL PORTAL</div>
+            </div>
+        </div>
+
+        <!-- Admin Navigation -->
+        <div class="p-3 flex-grow-1 overflow-auto">
+            <div class="small text-uppercase text-muted fw-bold px-3 py-2" style="font-size: 0.68rem; letter-spacing: 0.08em;">MANAGEMENT</div>
+            
+            <a class="admin-nav-link active" onclick="switchAdminTab('overview', this)">
+                <i class="bi bi-grid-1x2-fill text-warning"></i>
+                <span>Dashboard Overview</span>
+            </a>
+            <a class="admin-nav-link" onclick="switchAdminTab('customers', this)">
+                <i class="bi bi-people-fill text-info"></i>
+                <span>Customers & Balances</span>
+            </a>
+            <a class="admin-nav-link" onclick="switchAdminTab('transactions', this)">
+                <i class="bi bi-receipt-cutoff text-success"></i>
+                <span>Master Transactions</span>
+            </a>
+            <a class="admin-nav-link" onclick="switchAdminTab('deposits', this)">
+                <i class="bi bi-piggy-bank-fill text-primary"></i>
+                <span>Fixed & Recurring Deposits</span>
+            </a>
+            <a class="admin-nav-link" onclick="switchAdminTab('loans', this)">
+                <i class="bi bi-cash-stack text-warning"></i>
+                <span>Loan Management</span>
+            </a>
+            <a class="admin-nav-link" onclick="switchAdminTab('audit', this)">
+                <i class="bi bi-journal-text text-danger"></i>
+                <span>Security Audit Logs</span>
+            </a>
+
+            <div class="small text-uppercase text-muted fw-bold px-3 py-2 mt-3" style="font-size: 0.68rem; letter-spacing: 0.08em;">DEVELOPER SYSTEM</div>
+            <a href="/admin/" class="admin-nav-link">
+                <i class="bi bi-database text-white-50"></i>
+                <span>Django DB Admin</span>
+            </a>
+            <a href="{% url 'dashboard:home' %}" class="admin-nav-link">
+                <i class="bi bi-person-circle text-white-50"></i>
+                <span>Customer NetBanking</span>
+            </a>
+        </div>
+
+        <!-- Sidebar Footer -->
+        <div class="p-3 border-top border-white-50 border-opacity-10 bg-dark bg-opacity-25">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                        {{ user.username|first|upper }}
+                    </div>
+                    <div class="small">
+                        <div class="text-white fw-bold text-truncate" style="max-width: 120px;">{{ user.username }}</div>
+                        <div class="text-white-50" style="font-size: 0.7rem;">Bank Administrator</div>
+                    </div>
+                </div>
+                <a href="{% url 'accounts:logout' %}" class="btn btn-sm btn-outline-danger rounded-circle p-1" title="Logout">
+                    <i class="bi bi-box-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="admin-main">
+        
+        <!-- Admin Topbar -->
+        <header class="admin-topbar">
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-light d-lg-none rounded-circle p-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#adminMobileDrawer">
+                    <i class="bi bi-list fs-5"></i>
+                </button>
+                <div>
+                    <h5 class="fw-bold text-prm-navy mb-0 font-heading">Bank Manager Surveillance & Operations</h5>
+                    <small class="text-muted d-none d-sm-inline">Prime Reserve Bank Central Management Infrastructure</small>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <a href="{% url 'dashboard:home' %}" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-semibold">
+                    <i class="bi bi-box-arrow-up-right me-1"></i> Customer View
+                </a>
+                <a href="{% url 'accounts:logout' %}" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                    <i class="bi bi-power me-1"></i> Logout
+                </a>
+            </div>
+        </header>
+
+        <!-- Admin Content Body -->
+        <main class="admin-content">
+
+            <!-- Toast / Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert">
+                        <i class="bi bi-info-circle-fill me-2"></i> {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- SECTION 1: OVERVIEW & KPIS -->
+            <div id="tab-overview" class="admin-tab-pane">
+                
+                <!-- KPI Row -->
+                <div class="row g-3 mb-4">
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="kpi-card-admin">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <span class="text-secondary small fw-bold text-uppercase">Total Bank Deposits</span>
+                                    <h3 class="fw-bold text-success mb-0 font-heading mt-1">₹{{ total_deposits|intcomma }}</h3>
+                                </div>
+                                <div class="kpi-icon-box bg-success-subtle text-success">
+                                    <i class="bi bi-vault"></i>
+                                </div>
+                            </div>
+                            <small class="text-muted"><i class="bi bi-check-circle-fill text-success me-1"></i> Across {{ total_accounts }} active customer accounts</small>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="kpi-card-admin">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <span class="text-secondary small fw-bold text-uppercase">Registered Customers</span>
+                                    <h3 class="fw-bold text-prm-navy mb-0 font-heading mt-1">{{ total_customers }}</h3>
+                                </div>
+                                <div class="kpi-icon-box bg-primary-subtle text-primary">
+                                    <i class="bi bi-people-fill"></i>
+                                </div>
+                            </div>
+                            <small class="text-muted"><i class="bi bi-shield-check text-primary me-1"></i> 100% KYC verified user profiles</small>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="kpi-card-admin">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <span class="text-secondary small fw-bold text-uppercase">Today's Volume</span>
+                                    <h3 class="fw-bold text-info mb-0 font-heading mt-1">₹{{ today_volume|intcomma }}</h3>
+                                </div>
+                                <div class="kpi-icon-box bg-info-subtle text-info">
+                                    <i class="bi bi-arrow-left-right"></i>
+                                </div>
+                            </div>
+                            <small class="text-muted"><i class="bi bi-activity text-info me-1"></i> {{ today_count }} transfers executed today</small>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="kpi-card-admin">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <span class="text-secondary small fw-bold text-uppercase">Total Transactions</span>
+                                    <h3 class="fw-bold text-warning text-dark mb-0 font-heading mt-1">{{ total_transactions_count }}</h3>
+                                </div>
+                                <div class="kpi-icon-box bg-warning-subtle text-warning">
+                                    <i class="bi bi-receipt"></i>
+                                </div>
+                            </div>
+                            <small class="text-muted"><i class="bi bi-shield-lock-fill text-warning me-1"></i> Double-entry atomic ledger</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Analytics Charts Row -->
+                <div class="row g-4 mb-4">
+                    <div class="col-lg-8">
+                        <div class="card card-prm p-4 bg-white h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h5 class="fw-bold text-prm-navy mb-0">Daily Transaction Volume (Last 7 Days)</h5>
+                                    <small class="text-muted">Simulated ledger throughput analytics from MySQL</small>
+                                </div>
+                                <span class="badge bg-light text-secondary border">Live</span>
+                            </div>
+                            <div style="height: 260px; position: relative;">
+                                <canvas id="adminVolumeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="card card-prm p-4 bg-white h-100">
+                            <h5 class="fw-bold text-prm-navy mb-3">System Credit vs Debit Ratio</h5>
+                            <div style="height: 240px; position: relative;">
+                                <canvas id="adminRatioChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Summary Grid: Recent Customers & Recent High-Value Transactions -->
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <div class="card card-prm p-4 bg-white h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-bold text-prm-navy mb-0">High Net Worth Customer Accounts</h6>
+                                <button class="btn btn-sm btn-outline-primary rounded-pill" onclick="switchAdminTab('customers', document.querySelectorAll('.admin-nav-link')[1])">View All</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0 small">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Customer</th>
+                                            <th>Account Number</th>
+                                            <th class="text-end">Balance</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for acc in accounts|slice:":5" %}
+                                            <tr>
+                                                <td>
+                                                    <div class="fw-bold text-dark">{{ acc.user.get_full_name|default:acc.user.username }}</div>
+                                                    <div class="text-muted font-monospace" style="font-size: 0.7rem;">@{{ acc.user.username }}</div>
+                                                </td>
+                                                <td class="font-monospace fw-bold">{{ acc.account_number }}</td>
+                                                <td class="text-end font-monospace fw-bold text-success">₹{{ acc.balance|intcomma }}</td>
+                                                <td>
+                                                    {% if acc.status == 'ACTIVE' %}
+                                                        <span class="badge bg-success-subtle text-success">Active</span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger-subtle text-danger">{{ acc.status }}</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="card card-prm p-4 bg-white h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-bold text-prm-navy mb-0">Recent Master Ledger Activity</h6>
+                                <button class="btn btn-sm btn-outline-primary rounded-pill" onclick="switchAdminTab('transactions', document.querySelectorAll('.admin-nav-link')[2])">View All</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0 small">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Time</th>
+                                            <th>Channel</th>
+                                            <th>Parties</th>
+                                            <th class="text-end">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for tx in transactions|slice:":5" %}
+                                            <tr>
+                                                <td class="font-monospace text-muted">{{ tx.timestamp|time:"H:i:s" }}</td>
+                                                <td><span class="badge bg-light text-dark border">{{ tx.get_transaction_type_display }}</span></td>
+                                                <td class="text-truncate" style="max-width: 160px;">{{ tx.sender_name }} → {{ tx.receiver_name }}</td>
+                                                <td class="text-end font-monospace fw-bold">₹{{ tx.amount|intcomma }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- SECTION 2: CUSTOMERS & BALANCES MANAGEMENT -->
+            <div id="tab-customers" class="admin-tab-pane d-none">
+                <div class="card card-prm p-4 bg-white mb-4">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                        <div>
+                            <h5 class="fw-bold text-prm-navy mb-1">Customer Accounts & Balance Directory</h5>
+                            <p class="text-secondary small mb-0">Surveil live account balances, KYC verification status, and toggle account states (Active / Suspended).</p>
+                        </div>
+                        <form method="get" class="d-flex gap-2">
+                            <input type="text" name="account_q" value="{{ account_search }}" class="form-control" placeholder="Search customer, account #, email...">
+                            <button type="submit" class="btn btn-prm-primary rounded-pill px-4">Search</button>
+                        </form>
+                    </div>
+
+                    <div class="table-responsive rounded-3 border">
+                        <table class="table table-custom-admin mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Customer Profile</th>
+                                    <th>Account Number</th>
+                                    <th>Account Type</th>
+                                    <th>Branch / IFSC</th>
+                                    <th class="text-end">Live Available Balance</th>
+                                    <th>KYC Status</th>
+                                    <th>Account State</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for acc in accounts %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="bg-primary-subtle text-primary rounded-circle fw-bold d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+                                                    {{ acc.user.first_name|default:acc.user.username|first|upper }}
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold text-dark">{{ acc.user.get_full_name|default:acc.user.username }}</div>
+                                                    <div class="small text-muted font-monospace">CIF: {{ acc.user.profile.cif_number|default:"N/A" }} • @{{ acc.user.username }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="font-monospace fw-bold text-prm-navy">{{ acc.account_number }}</td>
+                                        <td>
+                                            <span class="badge {% if acc.account_type == 'SAVINGS' %}bg-primary-subtle text-primary{% else %}bg-secondary-subtle text-dark{% endif %}">
+                                                {{ acc.get_account_type_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="small fw-semibold">{{ acc.branch.branch_name }}</div>
+                                            <div class="small text-muted font-monospace">{{ acc.branch.ifsc_code }}</div>
+                                        </td>
+                                        <td class="text-end font-monospace fw-bold text-success fs-6">
+                                            ₹{{ acc.balance|intcomma }}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success-subtle text-success"><i class="bi bi-shield-check me-1"></i> VERIFIED</span>
+                                        </td>
+                                        <td>
+                                            {% if acc.status == 'ACTIVE' %}
+                                                <span class="badge bg-success text-white">ACTIVE</span>
+                                            {% elif acc.status == 'FROZEN' %}
+                                                <span class="badge bg-danger text-white">SUSPENDED</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ acc.status }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="{% url 'admin_dashboard:toggle_account_status' acc.id %}" class="btn btn-sm {% if acc.status == 'ACTIVE' %}btn-outline-danger{% else %}btn-outline-success{% endif %} rounded-pill px-3" onclick="return confirm('Are you sure you want to change status for account {{ acc.account_number }}?')">
+                                                {% if acc.status == 'ACTIVE' %}<i class="bi bi-pause-circle me-1"></i> Suspend{% else %}<i class="bi bi-play-circle me-1"></i> Activate{% endif %}
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="8" class="text-center py-4 text-muted">No customer accounts found.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 3: MASTER TRANSACTIONS MANAGEMENT -->
+            <div id="tab-transactions" class="admin-tab-pane d-none">
+                <div class="card card-prm p-4 bg-white mb-4">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                        <div>
+                            <h5 class="fw-bold text-prm-navy mb-1">Master Transaction Ledger</h5>
+                            <p class="text-secondary small mb-0">Full banking transaction feed across IMPS, NEFT, RTGS, UPI, Utility Bills, and Direct Deposits.</p>
+                        </div>
+                    </div>
+
+                    <!-- Search & Filter Options -->
+                    <form method="get" class="row g-3 align-items-center mb-4">
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted"><i class="bi bi-search"></i></span>
+                                <input type="text" name="tx_q" value="{{ tx_search }}" class="form-control" placeholder="Search by Ref ID, User, Account...">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select name="type" class="form-select bg-light" onchange="this.form.submit()">
+                                <option value="">All Transfer Channels</option>
+                                <option value="IMPS" {% if tx_type == 'IMPS' %}selected{% endif %}>IMPS (Instant)</option>
+                                <option value="NEFT" {% if tx_type == 'NEFT' %}selected{% endif %}>NEFT</option>
+                                <option value="RTGS" {% if tx_type == 'RTGS' %}selected{% endif %}>RTGS</option>
+                                <option value="UPI" {% if tx_type == 'UPI' %}selected{% endif %}>UPI Payment</option>
+                                <option value="BILL_PAYMENT" {% if tx_type == 'BILL_PAYMENT' %}selected{% endif %}>Bill Payment</option>
+                                <option value="DEPOSIT" {% if tx_type == 'DEPOSIT' %}selected{% endif %}>Deposit</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select name="status" class="form-select bg-light" onchange="this.form.submit()">
+                                <option value="">All Statuses</option>
+                                <option value="SUCCESS" {% if tx_status == 'SUCCESS' %}selected{% endif %}>Success</option>
+                                <option value="PENDING" {% if tx_status == 'PENDING' %}selected{% endif %}>Pending</option>
+                                <option value="FAILED" {% if tx_status == 'FAILED' %}selected{% endif %}>Failed</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex gap-2">
+                            <button type="submit" class="btn btn-prm-primary rounded-pill w-100">Filter</button>
+                        </div>
+                    </form>
+
+                    <!-- Master Transactions Table -->
+                    <div class="table-responsive rounded-3 border">
+                        <table class="table table-custom-admin mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Transaction ID / Ref</th>
+                                    <th>Sender Account</th>
+                                    <th>Receiver Beneficiary</th>
+                                    <th>Channel</th>
+                                    <th class="text-end">Amount</th>
+                                    <th>Status</th>
+                                    <th>Narration</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for tx in transactions %}
+                                    <tr>
+                                        <td>
+                                            <div class="fw-semibold text-dark">{{ tx.timestamp|date:"d M Y" }}</div>
+                                            <div class="small text-muted font-monospace">{{ tx.timestamp|time:"H:i:s" }}</div>
+                                        </td>
+                                        <td>
+                                            <div class="font-monospace fw-bold text-primary small">{{ tx.transaction_id }}</div>
+                                            <div class="font-monospace text-muted" style="font-size: 0.7rem;">{{ tx.reference_number }}</div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-bold text-dark">{{ tx.sender_name }}</div>
+                                            <div class="small text-muted font-monospace">{{ tx.sender_account.masked_account_number|default:"External" }}</div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-bold text-dark">{{ tx.receiver_name }}</div>
+                                            <div class="small text-muted font-monospace">{{ tx.receiver_account.masked_account_number|default:"External Payee" }}</div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border">{{ tx.get_transaction_type_display }}</span>
+                                        </td>
+                                        <td class="text-end font-monospace fw-bold fs-6">
+                                            ₹{{ tx.amount|intcomma }}
+                                        </td>
+                                        <td>
+                                            {% if tx.status == 'SUCCESS' %}
+                                                <span class="badge bg-success-subtle text-success"><i class="bi bi-check-circle-fill me-1"></i> SUCCESS</span>
+                                            {% elif tx.status == 'PENDING' %}
+                                                <span class="badge bg-warning-subtle text-warning"><i class="bi bi-hourglass-split me-1"></i> PENDING</span>
+                                            {% else %}
+                                                <span class="badge bg-danger-subtle text-danger"><i class="bi bi-x-circle-fill me-1"></i> FAILED</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="small text-secondary text-truncate d-inline-block" style="max-width: 180px;">{{ tx.remarks|default:"Transfer" }}</span>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="8" class="text-center py-4 text-muted">No transactions found matching the filter criteria.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 4: DEPOSITS MANAGEMENT (FD & RD) -->
+            <div id="tab-deposits" class="admin-tab-pane d-none">
+                <div class="card card-prm p-4 bg-white mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h5 class="fw-bold text-prm-navy mb-1">Fixed & Recurring Deposits Management</h5>
+                            <p class="text-secondary small mb-0">Total Active FD Portfolio Volume: <strong class="text-success font-monospace">₹{{ total_fd_volume|intcomma }}</strong></p>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-bold text-prm-navy mb-3"><i class="bi bi-piggy-bank me-2 text-primary"></i> Fixed Deposits (FD)</h6>
+                    <div class="table-responsive rounded-3 border mb-4">
+                        <table class="table table-custom-admin mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>FD Reference</th>
+                                    <th>Customer</th>
+                                    <th>Linked Account</th>
+                                    <th class="text-end">Principal Invested</th>
+                                    <th>Tenure / Rate</th>
+                                    <th class="text-end">Maturity Value</th>
+                                    <th>Maturity Date</th>
+                                    <th>Status</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fd in fixed_deposits %}
+                                    <tr>
+                                        <td class="font-monospace fw-bold text-primary">{{ fd.fd_number }}</td>
+                                        <td>
+                                            <div class="fw-bold text-dark">{{ fd.user.get_full_name|default:fd.user.username }}</div>
+                                            <div class="text-muted small">@{{ fd.user.username }}</div>
+                                        </td>
+                                        <td class="font-monospace">{{ fd.linked_account.masked_account_number }}</td>
+                                        <td class="text-end font-monospace fw-bold text-prm-navy">₹{{ fd.principal_amount|intcomma }}</td>
+                                        <td>{{ fd.tenure_months }} Mo @ <span class="badge bg-warning-subtle text-warning fw-bold">{{ fd.interest_rate }}%</span></td>
+                                        <td class="text-end font-monospace fw-bold text-success">₹{{ fd.maturity_amount|intcomma }}</td>
+                                        <td>{{ fd.maturity_date|date:"d M Y" }}</td>
+                                        <td>
+                                            {% if fd.status == 'ACTIVE' %}
+                                                <span class="badge bg-success-subtle text-success">Active</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary-subtle text-muted">{{ fd.status }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {% if fd.status == 'ACTIVE' %}
+                                                <a href="{% url 'admin_dashboard:close_fd' fd.id %}" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="return confirm('Prematurely close FD {{ fd.fd_number }} and refund ₹{{ fd.principal_amount }} to customer account?')">
+                                                    Close FD
+                                                </a>
+                                            {% else %}
+                                                <span class="text-muted small">Closed</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="9" class="text-center py-4 text-muted">No fixed deposits registered.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h6 class="fw-bold text-prm-navy mb-3"><i class="bi bi-calendar-check me-2 text-info"></i> Recurring Deposits (RD)</h6>
+                    <div class="table-responsive rounded-3 border">
+                        <table class="table table-custom-admin mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>RD Reference</th>
+                                    <th>Customer</th>
+                                    <th>Monthly Deposit</th>
+                                    <th>Tenure</th>
+                                    <th class="text-end">Projected Maturity</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for rd in recurring_deposits %}
+                                    <tr>
+                                        <td class="font-monospace fw-bold text-info">{{ rd.rd_number }}</td>
+                                        <td>{{ rd.user.get_full_name|default:rd.user.username }}</td>
+                                        <td class="font-monospace fw-bold">₹{{ rd.monthly_deposit|intcomma }}/mo</td>
+                                        <td>{{ rd.tenure_months }} Months @ {{ rd.interest_rate }}%</td>
+                                        <td class="text-end font-monospace fw-bold text-success">₹{{ rd.maturity_amount|intcomma }}</td>
+                                        <td><span class="badge bg-success-subtle text-success">{{ rd.status }}</span></td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-4 text-muted">No recurring deposits registered.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 5: LOANS MANAGEMENT -->
+            <div id="tab-loans" class="admin-tab-pane d-none">
+                <div class="card card-prm p-4 bg-white mb-4">
+                    <h5 class="fw-bold text-prm-navy mb-3">Active Customer Loans & Disbursals</h5>
+                    <div class="table-responsive rounded-3 border">
+                        <table class="table table-custom-admin mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Loan Account #</th>
+                                    <th>Customer</th>
+                                    <th>Product</th>
+                                    <th class="text-end">Principal Disbursed</th>
+                                    <th>Monthly EMI</th>
+                                    <th class="text-end">Outstanding Balance</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for loan in active_loans %}
+                                    <tr>
+                                        <td class="font-monospace fw-bold text-primary">{{ loan.loan_account_number }}</td>
+                                        <td>{{ loan.user.get_full_name|default:loan.user.username }}</td>
+                                        <td>{{ loan.loan_product.name }}</td>
+                                        <td class="text-end font-monospace">₹{{ loan.principal_amount|intcomma }}</td>
+                                        <td class="font-monospace text-warning fw-bold">₹{{ loan.monthly_emi|intcomma }}</td>
+                                        <td class="text-end font-monospace fw-bold text-danger">₹{{ loan.outstanding_balance|intcomma }}</td>
+                                        <td><span class="badge bg-success-subtle text-success">{{ loan.status }}</span></td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="7" class="text-center py-4 text-muted">No active loans found.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 6: AUDIT LOGS -->
+            <div id="tab-audit" class="admin-tab-pane d-none">
+                <div class="card card-prm p-4 bg-white mb-4">
+                    <h5 class="fw-bold text-prm-navy mb-3">System Security & Activity Audit Trail</h5>
+                    <div class="table-responsive rounded-3 border">
+                        <table class="table table-custom-admin mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>User</th>
+                                    <th>Action</th>
+                                    <th>Description & Details</th>
+                                    <th>Client IP</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in audit_logs %}
+                                    <tr>
+                                        <td class="font-monospace small text-muted">{{ log.timestamp|date:"d M Y H:i:s" }}</td>
+                                        <td><span class="fw-bold text-dark">@{{ log.user.username|default:"System" }}</span></td>
+                                        <td><span class="badge bg-light text-dark border">{{ log.action }}</span></td>
+                                        <td>{{ log.description }}</td>
+                                        <td class="font-monospace small text-muted">{{ log.ip_address|default:"127.0.0.1" }}</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4 text-muted">No audit logs recorded yet.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+</div>
+
+<!-- Mobile Offcanvas Navigation for Admin -->
+<div class="offcanvas offcanvas-start bg-dark text-white" tabindex="-1" id="adminMobileDrawer">
+    <div class="offcanvas-header border-bottom border-secondary">
+        <h5 class="offcanvas-title font-heading mb-0">PRIME RESERVE BANK ADMIN</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body p-3">
+        <a class="admin-nav-link text-white py-2" onclick="switchAdminTab('overview', this); bootstrap.Offcanvas.getInstance(document.getElementById('adminMobileDrawer')).hide();">Dashboard Overview</a>
+        <a class="admin-nav-link text-white py-2" onclick="switchAdminTab('customers', this); bootstrap.Offcanvas.getInstance(document.getElementById('adminMobileDrawer')).hide();">Customers & Balances</a>
+        <a class="admin-nav-link text-white py-2" onclick="switchAdminTab('transactions', this); bootstrap.Offcanvas.getInstance(document.getElementById('adminMobileDrawer')).hide();">Master Transactions</a>
+        <a class="admin-nav-link text-white py-2" onclick="switchAdminTab('deposits', this); bootstrap.Offcanvas.getInstance(document.getElementById('adminMobileDrawer')).hide();">Fixed & Recurring Deposits</a>
+        <a class="admin-nav-link text-white py-2" onclick="switchAdminTab('loans', this); bootstrap.Offcanvas.getInstance(document.getElementById('adminMobileDrawer')).hide();">Loan Management</a>
+        <a class="admin-nav-link text-white py-2" onclick="switchAdminTab('audit', this); bootstrap.Offcanvas.getInstance(document.getElementById('adminMobileDrawer')).hide();">Security Audit Logs</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function switchAdminTab(tabName, linkEl) {
+    document.querySelectorAll('.admin-tab-pane').forEach(el => el.classList.add('d-none'));
+    const target = document.getElementById('tab-' + tabName);
+    if (target) target.classList.remove('d-none');
+
+    document.querySelectorAll('.admin-nav-link').forEach(el => el.classList.remove('active'));
+    if (linkEl) linkEl.classList.add('active');
+}
+
+// Initialize Admin Charts
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('{% url "admin_dashboard:analytics_api" %}')
+        .then(res => res.json())
+        .then(data => {
+            const ctxVol = document.getElementById('adminVolumeChart');
+            if (ctxVol && data.days_labels) {
+                new Chart(ctxVol, {
+                    type: 'bar',
+                    data: {
+                        labels: data.days_labels,
+                        datasets: [{
+                            label: 'Volume (₹)',
+                            data: data.volume_data,
+                            backgroundColor: 'rgba(37, 99, 235, 0.85)',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: {
+                                ticks: {
+                                    callback: function(val) { return '₹' + Number(val).toLocaleString('en-IN'); }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            const ctxRatio = document.getElementById('adminRatioChart');
+            if (ctxRatio) {
+                new Chart(ctxRatio, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Total Credits', 'Total Debits'],
+                        datasets: [{
+                            data: [data.credit_total || 100000, data.debit_total || 50000],
+                            backgroundColor: ['#10b981', '#ef4444'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+            }
+        })
+        .catch(err => console.log('Admin analytics chart load:', err));
+});
+</script>
+{% endblock %}

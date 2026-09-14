@@ -1,0 +1,73 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Bill Payment Receipt — {{ bill.receipt_number }} — PRIME RESERVE BANK{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid p-0">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card card-prm p-4 p-md-5 bg-white text-center">
+                <div class="bg-success text-white rounded-circle p-3 d-inline-flex mx-auto mb-3 shadow-sm" style="width: 64px; height: 64px; align-items: center; justify-content: center;">
+                    <i class="bi bi-receipt-cutoff fs-2"></i>
+                </div>
+                <h4 class="fw-bold text-prm-navy font-heading mb-1">Bill Payment Successful</h4>
+                <p class="text-secondary small mb-3">Your utility bill payment has been successfully recorded</p>
+
+                <div class="p-3 bg-light rounded-4 text-center my-3 border">
+                    <div class="small text-secondary mb-1">Total Amount Paid</div>
+                    <div class="display-5 fw-bold text-prm-navy font-heading">₹{{ bill.amount|intcomma }}</div>
+                    <div class="badge bg-success-subtle text-success px-3 py-1 mt-2">
+                        <i class="bi bi-check-circle-fill me-1"></i> {{ bill.get_biller_status_display }}
+                    </div>
+                </div>
+
+                <div class="table-responsive my-4 text-start">
+                    <table class="table table-borderless small mb-0">
+                        <tbody>
+                            <tr class="border-bottom">
+                                <td class="text-secondary py-2">Receipt Number</td>
+                                <td class="text-end fw-bold font-monospace text-primary py-2">{{ bill.receipt_number }}</td>
+                            </tr>
+                            <tr class="border-bottom">
+                                <td class="text-secondary py-2">Service Provider / Biller</td>
+                                <td class="text-end fw-semibold text-prm-navy py-2">{{ bill.biller.name }}</td>
+                            </tr>
+                            <tr class="border-bottom">
+                                <td class="text-secondary py-2">Category</td>
+                                <td class="text-end py-2">{{ bill.biller.category.name }}</td>
+                            </tr>
+                            <tr class="border-bottom">
+                                <td class="text-secondary py-2">Consumer / Mobile ID</td>
+                                <td class="text-end font-monospace py-2">{{ bill.consumer_number }}</td>
+                            </tr>
+                            <tr class="border-bottom">
+                                <td class="text-secondary py-2">Paid From Account</td>
+                                <td class="text-end font-monospace py-2">{{ bill.bank_account.masked_account_number }}</td>
+                            </tr>
+                            <tr class="border-bottom">
+                                <td class="text-secondary py-2">Payment Date & Time</td>
+                                <td class="text-end py-2">{{ bill.payment_date|date:"d F Y, h:i:s A" }}</td>
+                            </tr>
+                            {% if bill.transaction %}
+                                <tr>
+                                    <td class="text-secondary py-2">Bank Reference Ref</td>
+                                    <td class="text-end font-monospace text-muted py-2">{{ bill.transaction.reference_number }}</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'bills:home' %}" class="btn btn-light rounded-pill px-4">Back to Bills</a>
+                    <button onclick="window.print()" class="btn btn-outline-secondary rounded-pill px-4">
+                        <i class="bi bi-printer me-1"></i> Print Receipt
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

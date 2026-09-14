@@ -1,0 +1,65 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+
+{% block title %}Notifications Center — PRIME RESERVE BANK{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid p-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold text-prm-navy mb-1 font-heading">Notifications & Alerts</h4>
+            <p class="text-secondary small mb-0">System alerts, debit/credit advisories, and security notifications</p>
+        </div>
+        <div>
+            <a href="{% url 'accounts:notifications' %}?mark_all_read=true" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                <i class="bi bi-check-all me-1"></i> Mark All as Read
+            </a>
+        </div>
+    </div>
+
+    <div class="card card-prm overflow-hidden">
+        <div class="list-group list-group-flush">
+            {% for notif in page_obj %}
+                <div class="list-group-item p-4 d-flex align-items-start gap-3 {% if not notif.is_read %}bg-light border-start border-4 border-primary{% endif %}">
+                    <div class="rounded-circle p-2 d-flex align-items-center justify-content-center {% if notif.notification_type == 'SUCCESS' %}bg-success-subtle text-success{% elif notif.notification_type == 'SECURITY' %}bg-danger-subtle text-danger{% else %}bg-primary-subtle text-primary{% endif %}" style="width: 42px; height: 42px; flex-shrink: 0;">
+                        {% if notif.notification_type == 'SUCCESS' %}
+                            <i class="bi bi-check-circle-fill fs-5"></i>
+                        {% elif notif.notification_type == 'SECURITY' %}
+                            <i class="bi bi-shield-exclamation fs-5"></i>
+                        {% else %}
+                            <i class="bi bi-info-circle-fill fs-5"></i>
+                        {% endif %}
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h6 class="fw-bold text-prm-navy mb-0">{{ notif.title }}</h6>
+                            <small class="text-muted">{{ notif.created_at|date:"d M Y, h:i A" }}</small>
+                        </div>
+                        <p class="text-secondary mb-0 small">{{ notif.message }}</p>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-bell-slash fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                    No notifications available.
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                {% endif %}
+                <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+                {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+{% endblock %}

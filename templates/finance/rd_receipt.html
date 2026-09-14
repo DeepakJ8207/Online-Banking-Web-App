@@ -1,0 +1,80 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Recurring Deposit Created — {{ rd.rd_number }} — PRIME RESERVE BANK{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid p-0">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            
+            <div class="card card-prm p-4 p-md-5 bg-white text-center">
+                <!-- Success Icon -->
+                <div class="bg-success text-white rounded-circle p-3 d-inline-flex mb-3 shadow-sm" style="width: 72px; height: 72px; align-items: center; justify-content: center;">
+                    <i class="bi bi-check-lg display-5"></i>
+                </div>
+                
+                <h3 class="fw-bold text-prm-navy font-heading mb-1">Recurring Deposit Started Successfully!</h3>
+                <p class="text-secondary small mb-4">Your RD account has been opened and the 1st monthly installment debited.</p>
+
+                <!-- Key RD Stats Box -->
+                <div class="p-4 bg-light rounded-4 my-3 border text-start">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <div class="text-muted small">RD Reference Number</div>
+                            <div class="font-monospace fw-bold text-primary fs-5">{{ rd.rd_number }}</div>
+                        </div>
+                        <div class="col-sm-6 text-sm-end">
+                            <div class="text-muted small">Status</div>
+                            <span class="badge bg-success-subtle text-success px-3 py-1 fw-bold"><i class="bi bi-patch-check-fill me-1"></i> ACTIVE RD</span>
+                        </div>
+                        
+                        <div class="col-12"><hr class="my-2 text-muted opacity-25"></div>
+
+                        <div class="col-sm-6">
+                            <div class="text-muted small">Monthly Installment</div>
+                            <div class="display-6 fw-bold text-prm-navy font-heading">₹{{ rd.monthly_deposit|intcomma }}/mo</div>
+                        </div>
+                        <div class="col-sm-6 text-sm-end">
+                            <div class="text-muted small">Projected Maturity Value</div>
+                            <div class="display-6 fw-bold text-success font-heading">₹{{ rd.maturity_amount|intcomma }}</div>
+                        </div>
+
+                        <div class="col-12"><hr class="my-2 text-muted opacity-25"></div>
+
+                        <div class="col-6 col-sm-3">
+                            <div class="text-muted small" style="font-size: 0.75rem;">Tenure</div>
+                            <div class="fw-bold text-dark">{{ rd.tenure_months }} Months</div>
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <div class="text-muted small" style="font-size: 0.75rem;">Interest Rate</div>
+                            <div class="fw-bold text-warning">{{ rd.interest_rate }}% p.a.</div>
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <div class="text-muted small" style="font-size: 0.75rem;">Total Deposit</div>
+                            <div class="fw-bold text-dark">₹{{ rd.total_deposit|intcomma }}</div>
+                        </div>
+                        <div class="col-6 col-sm-3 text-sm-end">
+                            <div class="text-muted small" style="font-size: 0.75rem;">Interest Earned</div>
+                            <div class="fw-bold text-success">+₹{{ rd.interest_earned|intcomma }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex flex-wrap justify-content-between gap-2 mt-4 pt-3 border-top">
+                    <a href="{% url 'dashboard:home' %}" class="btn btn-light rounded-pill px-4">
+                        <i class="bi bi-grid me-1"></i> Dashboard
+                    </a>
+                    <a href="{% url 'finance:deposits' %}" class="btn btn-prm-primary rounded-pill px-4 shadow-sm">
+                        <i class="bi bi-piggy-bank me-1"></i> View All Deposits
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

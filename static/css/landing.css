@@ -1,0 +1,108 @@
+/* ====================================================
+   PRIME RESERVE BANK - Public Landing Page Styles
+   ==================================================== */
+
+.hero-section {
+  background: radial-gradient(circle at top right, #132f5d 0%, #0d2346 40%, #061122 100%);
+  color: #ffffff;
+  padding: 5rem 0 6rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+}
+
+.hero-badge {
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #93c5fd;
+  padding: 0.4rem 1rem;
+  border-radius: 30px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hero-title {
+  font-size: 3.25rem;
+  font-weight: 800;
+  line-height: 1.15;
+  color: #ffffff;
+  letter-spacing: -0.03em;
+}
+
+.hero-subtitle {
+  font-size: 1.15rem;
+  color: #cbd5e1;
+  max-width: 580px;
+  line-height: 1.6;
+}
+
+.service-card {
+  background: #ffffff;
+  border: 1px solid var(--prm-slate-200);
+  border-radius: var(--prm-radius-lg);
+  padding: 2rem 1.5rem;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  height: 100%;
+}
+
+.service-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--prm-shadow-lg);
+  border-color: rgba(26, 86, 219, 0.4);
+}
+
+.service-icon-box {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  margin-bottom: 1.25rem;
+}
+
+.stats-counter {
+  font-family: var(--prm-font-heading);
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--prm-navy-900);
+  line-height: 1;
+}
+
+.security-feature-item {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.security-icon-circle {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--prm-emerald-50);
+  color: var(--prm-emerald-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 991.98px) {
+  .hero-title { font-size: 2.4rem; }
+  .hero-section { padding: 3.5rem 0 4rem 0; }
+}

@@ -1,0 +1,213 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Send Money — PRIME RESERVE BANK{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid p-0">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a href="{% url 'transfers:home' %}" class="btn btn-sm btn-light rounded-pill px-3 mb-2">
+                <i class="bi bi-arrow-left me-1"></i> Back to Transfers
+            </a>
+            <h4 class="fw-bold text-prm-navy mb-1 font-heading">Send Money (Bank Account Transfer)</h4>
+            <p class="text-secondary small mb-0">Transfer funds instantly via IMPS / NEFT with double-entry balance verification</p>
+        </div>
+    </div>
+
+    <!-- Transfer Method Selection Tabs/Cards (Section 15) -->
+    <div class="row g-2 mb-4">
+        <div class="col-6 col-md-3">
+            <a href="{% url 'transfers:bank_transfer' %}" class="btn btn-prm-primary w-100 py-3 rounded-4 shadow-sm text-center d-flex flex-column align-items-center">
+                <i class="bi bi-bank fs-4 mb-1"></i>
+                <span class="fw-bold small">To Bank Account</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="{% url 'transfers:mobile_transfer' %}" class="btn btn-outline-secondary w-100 py-3 rounded-4 bg-white text-center d-flex flex-column align-items-center">
+                <i class="bi bi-phone fs-4 mb-1 text-success"></i>
+                <span class="fw-bold small text-dark">To Mobile Number</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="{% url 'transfers:upi_transfer' %}" class="btn btn-outline-secondary w-100 py-3 rounded-4 bg-white text-center d-flex flex-column align-items-center">
+                <i class="bi bi-qr-code fs-4 mb-1 text-warning"></i>
+                <span class="fw-bold small text-dark">UPI ID / VPA</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="{% url 'transfers:self_transfer' %}" class="btn btn-outline-secondary w-100 py-3 rounded-4 bg-white text-center d-flex flex-column align-items-center">
+                <i class="bi bi-arrow-repeat fs-4 mb-1 text-primary"></i>
+                <span class="fw-bold small text-dark">Self Transfer</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card card-prm p-4 p-md-5 bg-white">
+                
+                <form method="post" id="bankTransferForm">
+                    {% csrf_token %}
+
+                    <!-- From Account Card -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-prm-navy mb-2">From Account (Debit Source)</label>
+                        {{ form.sender_account }}
+                    </div>
+
+                    <!-- Quick Beneficiary Selection -->
+                    {% if form.beneficiary.field.queryset.exists %}
+                        <div class="mb-4 p-3 bg-light rounded-4 border">
+                            <label class="form-label small fw-bold text-primary mb-2">
+                                <i class="bi bi-people-fill me-1"></i> Choose Saved Beneficiary
+                            </label>
+                            {{ form.beneficiary }}
+                            <small class="text-muted d-block mt-1">Select a payee above to auto-populate account details below.</small>
+                        </div>
+                    {% endif %}
+
+                    <!-- Recipient Details -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Beneficiary Account Name</label>
+                            {{ form.receiver_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Bank IFSC Code</label>
+                            {{ form.receiver_ifsc }}
+                            <small class="text-muted">e.g. <code>PRMB0001001</code> or <code>HDFC0001234</code></small>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-semibold">Beneficiary Account Number</label>
+                        {{ form.receiver_account_number }}
+                    </div>
+
+                    <!-- Amount & Remarks -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-prm-navy">Transfer Amount (₹)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light fw-bold text-prm-navy">₹</span>
+                                <input type="number" name="amount" id="transferAmountInput" class="form-control form-control-lg fw-bold" placeholder="5000" min="1" max="500000" step="100" value="{{ form.amount.value|default:'' }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Remarks / Narration</label>
+                            {{ form.remarks }}
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <a href="{% url 'transfers:home' %}" class="btn btn-light rounded-pill px-4">Cancel</a>
+                        <button type="button" class="btn btn-prm-primary btn-lg rounded-pill px-5 shadow" onclick="openTransferReviewModal()">
+                            <i class="bi bi-arrow-right-circle me-1"></i> Review Transfer
+                        </button>
+                    </div>
+
+                    <!-- Review & Confirm Transfer Modal (Section 15) -->
+                    <div class="modal fade" id="transferReviewModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                                <div class="bg-prm-navy p-4 text-white text-center">
+                                    <h5 class="fw-bold font-heading mb-1 text-white">Review Transfer Details</h5>
+                                    <p class="text-white-50 small mb-0">Please verify transfer destination and amount</p>
+                                </div>
+                                <div class="modal-body p-4 bg-white">
+                                    <div class="p-3 bg-light rounded-3 mb-3 text-center border">
+                                        <small class="text-muted d-block">Total Transfer Amount</small>
+                                        <div class="display-6 fw-bold text-prm-navy font-heading" id="modalReviewAmount">₹5,000</div>
+                                    </div>
+
+                                    <div class="list-group list-group-flush mb-4 small">
+                                        <div class="list-group-item d-flex justify-content-between px-0 py-2">
+                                            <span class="text-muted">From Account:</span>
+                                            <strong class="text-dark font-monospace" id="modalReviewFrom">Primary Savings Account</strong>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between px-0 py-2">
+                                            <span class="text-muted">Recipient Name:</span>
+                                            <strong class="text-prm-navy" id="modalReviewToName">Rahul Sharma</strong>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between px-0 py-2">
+                                            <span class="text-muted">Recipient Account #:</span>
+                                            <strong class="text-dark font-monospace" id="modalReviewToAcc">XXXX XXXX 8721</strong>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between px-0 py-2">
+                                            <span class="text-muted">IFSC Code:</span>
+                                            <strong class="text-dark font-monospace" id="modalReviewIfsc">PRMB0001001</strong>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between px-0 py-2">
+                                            <span class="text-muted">Remarks:</span>
+                                            <strong class="text-secondary" id="modalReviewRemarks">Transfer</strong>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4 p-3 bg-light rounded-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <label class="form-label small fw-bold text-prm-navy mb-0">Enter Transaction PIN</label>
+                                            <small class="text-muted">Demo PIN: <b>1234</b></small>
+                                        </div>
+                                        <input type="password" name="transaction_pin" id="modalTxnPin" class="form-control text-center font-monospace fs-5 tracking-widest" maxlength="4" placeholder="••••" required>
+                                    </div>
+
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Modify</button>
+                                        <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold">
+                                            <i class="bi bi-send-check-fill me-1"></i> Confirm Transfer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openTransferReviewModal() {
+    const amt = parseFloat(document.getElementById('transferAmountInput').value);
+    const receiverName = document.querySelector('input[name="receiver_name"]').value.trim();
+    const receiverAcc = document.querySelector('input[name="receiver_account_number"]').value.trim();
+    const receiverIfsc = document.querySelector('input[name="receiver_ifsc"]').value.trim();
+    const remarks = document.querySelector('input[name="remarks"]').value.trim() || 'Fund Transfer';
+
+    if (!receiverName) {
+        alert('Please enter beneficiary account name.');
+        return;
+    }
+    if (!receiverAcc) {
+        alert('Please enter beneficiary account number.');
+        return;
+    }
+    if (!amt || amt <= 0) {
+        alert('Please enter a valid transfer amount.');
+        return;
+    }
+
+    const senderSelect = document.querySelector('select[name="sender_account"]');
+    const senderText = senderSelect ? senderSelect.options[senderSelect.selectedIndex].text : 'Primary Account';
+
+    document.getElementById('modalReviewAmount').textContent = '₹' + amt.toLocaleString('en-IN');
+    document.getElementById('modalReviewFrom').textContent = senderText;
+    document.getElementById('modalReviewToName').textContent = receiverName;
+    document.getElementById('modalReviewToAcc').textContent = receiverAcc;
+    document.getElementById('modalReviewIfsc').textContent = receiverIfsc || 'PRMB0001001';
+    document.getElementById('modalReviewRemarks').textContent = remarks;
+
+    const modal = new bootstrap.Modal(document.getElementById('transferReviewModal'));
+    modal.show();
+}
+</script>
+{% endblock %}

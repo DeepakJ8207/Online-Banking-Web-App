@@ -1,0 +1,174 @@
+{% extends "base_auth.html" %}
+{% load static %}
+
+{% block title %}Internet Banking Registration — PRIME RESERVE BANK{% endblock %}
+
+{% block auth_content %}
+<div class="col-md-9 col-lg-7">
+    <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="bg-prm-gradient p-4 text-white text-center">
+            <div class="bg-warning text-dark rounded-3 d-inline-flex align-items-center justify-content-center p-2 mb-2 shadow-sm" style="width: 44px; height: 44px;">
+                <i class="bi bi-person-plus-fill fs-4"></i>
+            </div>
+            <h4 class="font-heading fw-bold mb-1">Internet Banking Registration</h4>
+            <p class="text-white-50 small mb-0">Activate online access for your Prime Reserve Bank account in 4 easy steps</p>
+        </div>
+
+        <!-- Wizard Progress Bar -->
+        <div class="bg-light p-3 border-bottom">
+            <div class="d-flex justify-content-between align-items-center position-relative">
+                <div class="text-center" style="z-index: 2;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 fw-bold {% if step >= 1 %}bg-primary text-white{% else %}bg-secondary-subtle text-muted{% endif %}" style="width: 32px; height: 32px; font-size: 0.85rem;">1</div>
+                    <small class="d-none d-sm-block fw-semibold {% if step == 1 %}text-primary{% else %}text-muted{% endif %}">Account & CIF</small>
+                </div>
+                <div class="text-center" style="z-index: 2;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 fw-bold {% if step >= 2 %}bg-primary text-white{% else %}bg-secondary-subtle text-muted{% endif %}" style="width: 32px; height: 32px; font-size: 0.85rem;">2</div>
+                    <small class="d-none d-sm-block fw-semibold {% if step == 2 %}text-primary{% else %}text-muted{% endif %}">Mobile Verify</small>
+                </div>
+                <div class="text-center" style="z-index: 2;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 fw-bold {% if step >= 3 %}bg-primary text-white{% else %}bg-secondary-subtle text-muted{% endif %}" style="width: 32px; height: 32px; font-size: 0.85rem;">3</div>
+                    <small class="d-none d-sm-block fw-semibold {% if step == 3 %}text-primary{% else %}text-muted{% endif %}">OTP Check</small>
+                </div>
+                <div class="text-center" style="z-index: 2;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 fw-bold {% if step >= 4 %}bg-primary text-white{% else %}bg-secondary-subtle text-muted{% endif %}" style="width: 32px; height: 32px; font-size: 0.85rem;">4</div>
+                    <small class="d-none d-sm-block fw-semibold {% if step == 4 %}text-primary{% else %}text-muted{% endif %}">Set Password</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-4 p-md-5 bg-white">
+
+            <!-- STEP 1: Account Number & CIF -->
+            {% if step == 1 %}
+                <div class="mb-4">
+                    <h5 class="fw-bold text-prm-navy mb-1">Step 1: Verify Bank Account & CIF</h5>
+                    <p class="text-secondary small">Enter your 14-digit Account Number and 11-digit Customer ID / CIF printed on your passbook or welcome kit.</p>
+                </div>
+
+                <div class="alert alert-info py-2 small mb-4">
+                    <i class="bi bi-info-circle-fill me-1"></i> <b>Demo Test Credentials:</b><br/>
+                    Account No: <code>10010020030045</code> | CIF: <code>98765432101</code> (Aarav Sharma)
+                </div>
+
+                <form method="post" action="{% url 'accounts:register' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="reg-account-number" class="form-label small fw-semibold">Account Number</label>
+                        {{ form1.account_number }}
+                        <small class="text-muted">{{ form1.account_number.help_text }}</small>
+                    </div>
+                    <div class="mb-4">
+                        <label for="reg-cif-number" class="form-label small fw-semibold">CIF / Customer ID Number</label>
+                        {{ form1.cif_number }}
+                        <small class="text-muted">{{ form1.cif_number.help_text }}</small>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'accounts:login' %}" class="btn btn-light rounded-pill px-4">Back to Login</a>
+                        <button type="submit" class="btn btn-prm-primary rounded-pill px-4">Continue <i class="bi bi-arrow-right ms-1"></i></button>
+                    </div>
+                </form>
+            {% endif %}
+
+            <!-- STEP 2: Verify Mobile Number -->
+            {% if step == 2 %}
+                <div class="mb-4">
+                    <h5 class="fw-bold text-prm-navy mb-1">Step 2: Verify Registered Mobile Number</h5>
+                    <p class="text-secondary small">Enter the 10-digit mobile number linked with Account <b>{{ reg_account_number }}</b>.</p>
+                </div>
+
+                <div class="alert alert-info py-2 small mb-4">
+                    <i class="bi bi-info-circle-fill me-1"></i> <b>Demo Registered Mobile:</b> <code>9876543210</code>
+                </div>
+
+                <form method="post" action="{% url 'accounts:register' %}">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label for="reg-mobile" class="form-label small fw-semibold">Registered Mobile Number</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light">+91</span>
+                            {{ form2.registered_mobile }}
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" name="action" value="reset" class="btn btn-light rounded-pill px-4">Start Over</button>
+                        <button type="submit" class="btn btn-prm-primary rounded-pill px-4">Send OTP <i class="bi bi-chat-left-dots ms-1"></i></button>
+                    </div>
+                </form>
+            {% endif %}
+
+            <!-- STEP 3: OTP Verification -->
+            {% if step == 3 %}
+                <div class="mb-4">
+                    <h5 class="fw-bold text-prm-navy mb-1">Step 3: One-Time Password (OTP) Verification</h5>
+                    <p class="text-secondary small">Enter the 6-digit OTP code sent to your registered mobile <b>+91 ******{{ reg_mobile|slice:"-4:" }}</b>.</p>
+                </div>
+
+                {% if demo_otp and DEMO_OTP_DISPLAY %}
+                    <div class="alert alert-warning py-3 mb-4 text-center border-warning">
+                        <div class="fw-bold text-dark"><i class="bi bi-shield-lock-fill text-warning me-1"></i> FREE DEMO OTP GENERATED:</div>
+                        <div class="display-6 font-monospace fw-bold tracking-widest text-primary my-1">{{ demo_otp }}</div>
+                        <small class="text-muted">(For educational demonstration, enter this OTP above to proceed)</small>
+                    </div>
+                {% endif %}
+
+                <form method="post" action="{% url 'accounts:register' %}">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label for="reg-otp" class="form-label small fw-semibold text-center d-block">Enter 6-Digit OTP</label>
+                        {{ form3.otp_code }}
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" name="action" value="reset" class="btn btn-light rounded-pill px-4">Cancel</button>
+                        <button type="submit" class="btn btn-prm-primary rounded-pill px-4">Verify OTP <i class="bi bi-check2-circle ms-1"></i></button>
+                    </div>
+                </form>
+            {% endif %}
+
+            <!-- STEP 4: Create Internet Banking Credentials -->
+            {% if step == 4 %}
+                <div class="mb-4">
+                    <h5 class="fw-bold text-prm-navy mb-1">Step 4: Create NetBanking Credentials</h5>
+                    <p class="text-secondary small">Create your unique username and secure password to complete registration.</p>
+                </div>
+
+                <form method="post" action="{% url 'accounts:register' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="reg-username" class="form-label small fw-semibold">Choose User ID / Username</label>
+                        {{ form4.username }}
+                        {% if form4.username.errors %}
+                            <div class="text-danger small mt-1">{{ form4.username.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="reg-password" class="form-label small fw-semibold">Create Password</label>
+                        <div class="input-group">
+                            {{ form4.password }}
+                            <button class="btn btn-outline-secondary toggle-password-btn" type="button" data-target="reg-password"><i class="bi bi-eye"></i></button>
+                        </div>
+                        <small class="text-muted">{{ form4.password.help_text }}</small>
+                        {% if form4.password.errors %}
+                            <div class="text-danger small mt-1">{{ form4.password.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-4">
+                        <label for="reg-confirm-password" class="form-label small fw-semibold">Confirm Password</label>
+                        <div class="input-group">
+                            {{ form4.confirm_password }}
+                            <button class="btn btn-outline-secondary toggle-password-btn" type="button" data-target="reg-confirm-password"><i class="bi bi-eye"></i></button>
+                        </div>
+                        {% if form4.confirm_password.errors %}
+                            <div class="text-danger small mt-1">{{ form4.confirm_password.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" name="action" value="reset" class="btn btn-light rounded-pill px-4">Cancel</button>
+                        <button type="submit" class="btn btn-success rounded-pill px-4">Activate NetBanking <i class="bi bi-patch-check-fill ms-1"></i></button>
+                    </div>
+                </form>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}

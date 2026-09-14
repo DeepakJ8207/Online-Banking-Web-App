@@ -1,0 +1,93 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | PRIME RESERVE BANK{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    #header {
+        background: #0b1f3a !important;
+        color: #ffffff !important;
+        border-bottom: 3px solid #f59e0b;
+        padding: 12px 24px !important;
+    }
+    #branding h1 {
+        margin: 0 !important;
+        font-size: 1.25rem !important;
+        font-weight: 700 !important;
+        color: #ffffff !important;
+    }
+    #branding h1 a:link, #branding h1 a:visited {
+        color: #f59e0b !important;
+        text-decoration: none !important;
+    }
+    .custom-admin-nav-banner {
+        background: #ffffff;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 10px 24px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    }
+    .custom-admin-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    .btn-customer-portal {
+        background-color: #0d6efd;
+        color: #ffffff !important;
+    }
+    .btn-customer-portal:hover {
+        background-color: #0b5ed7;
+    }
+    .btn-manager-overview {
+        background-color: #f59e0b;
+        color: #0b1f3a !important;
+    }
+    .btn-manager-overview:hover {
+        background-color: #d97706;
+        color: #ffffff !important;
+    }
+</style>
+{% endblock %}
+
+{% block branding %}
+<div id="branding">
+    <h1 id="site-name">
+        <a href="{% url 'admin:index' %}">
+            🏛️ PRIME RESERVE BANK — Core Banking Administration
+        </a>
+    </h1>
+</div>
+{% endblock %}
+
+{% block nav-global %}
+<div class="custom-admin-nav-banner">
+    <div style="font-size: 0.88rem; color: #334155;">
+        <span style="background: #e2e8f0; color: #0f172a; padding: 2px 8px; border-radius: 4px; font-weight: 600; margin-right: 8px;">QUICK ACCESS</span>
+        Switch to the graphical user and manager portals:
+    </div>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <a href="{% url 'dashboard:admin_overview' %}" class="custom-admin-btn btn-manager-overview">
+            📊 Bank Manager Overview (Live Balances & Transactions)
+        </a>
+        <a href="{% url 'dashboard:home' %}" class="custom-admin-btn btn-customer-portal">
+            👤 Customer NetBanking Portal
+        </a>
+        <a href="/" class="custom-admin-btn" style="background: #f1f5f9; color: #334155 !important;">
+            🌐 Bank Home Page
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Transaction Details — {{ txn.transaction_id }} — PRIME RESERVE BANK{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid p-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a href="{% url 'transactions:history' %}" class="btn btn-sm btn-light rounded-pill px-3 mb-2">
+                <i class="bi bi-arrow-left me-1"></i> Back to History
+            </a>
+            <h4 class="fw-bold text-prm-navy mb-1 font-heading">Transaction Inspection</h4>
+            <div class="text-secondary small font-monospace">Txn ID: {{ txn.transaction_id }}</div>
+        </div>
+        <a href="{% url 'transfers:receipt' txn.transaction_id %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+            <i class="bi bi-printer me-1"></i> Printable Receipt
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card card-prm p-4 p-md-5 bg-white">
+                <div class="text-center pb-4 mb-4 border-bottom">
+                    <div class="small text-secondary mb-1">Transaction Value</div>
+                    <div class="display-5 fw-bold font-heading {% if is_sender %}text-danger{% else %}text-success{% endif %}">
+                        {% if is_sender %}-₹{{ txn.amount|intcomma }}{% else %}+₹{{ txn.amount|intcomma }}{% endif %}
+                    </div>
+                    <span class="badge bg-success-subtle text-success mt-2 px-3 py-1 fw-bold">
+                        <i class="bi bi-check-circle-fill me-1"></i> Status: {{ txn.get_status_display }}
+                    </span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                        <tbody>
+                            <tr>
+                                <th class="bg-light text-secondary small w-40">Bank Reference No</th>
+                                <td class="font-monospace fw-bold text-primary">{{ txn.reference_number }}</td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light text-secondary small">Channel / Type</th>
+                                <td>{{ txn.get_transaction_type_display }}</td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light text-secondary small">Category</th>
+                                <td><span class="badge bg-light text-secondary border">{{ txn.get_category_display }}</span></td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light text-secondary small">Sender Name</th>
+                                <td class="fw-semibold">{{ txn.sender_name }}</td>
+                            </tr>
+                            {% if txn.sender_account %}
+                                <tr>
+                                    <th class="bg-light text-secondary small">Sender Account</th>
+                                    <td class="font-monospace">{{ txn.sender_account.masked_account_number }}</td>
+                                </tr>
+                            {% endif %}
+                            <tr>
+                                <th class="bg-light text-secondary small">Receiver Name</th>
+                                <td class="fw-semibold">{{ txn.receiver_name }}</td>
+                            </tr>
+                            {% if txn.receiver_account %}
+                                <tr>
+                                    <th class="bg-light text-secondary small">Receiver Account</th>
+                                    <td class="font-monospace">{{ txn.receiver_account.masked_account_number }}</td>
+                                </tr>
+                            {% endif %}
+                            <tr>
+                                <th class="bg-light text-secondary small">Remarks / Purpose</th>
+                                <td>{{ txn.remarks }}</td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light text-secondary small">Timestamp</th>
+                                <td>{{ txn.timestamp|date:"d F Y, h:i:s A" }}</td>
+                            </tr>
+                            {% if is_sender and txn.sender_balance_after %}
+                                <tr>
+                                    <th class="bg-light text-secondary small">Sender Balance After</th>
+                                    <td class="font-monospace fw-bold">₹{{ txn.sender_balance_after|intcomma }}</td>
+                                </tr>
+                            {% elif not is_sender and txn.receiver_balance_after %}
+                                <tr>
+                                    <th class="bg-light text-secondary small">Receiver Balance After</th>
+                                    <td class="font-monospace fw-bold">₹{{ txn.receiver_balance_after|intcomma }}</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'transactions:history' %}" class="btn btn-light rounded-pill px-4">Back</a>
+                    <a href="{% url 'transfers:receipt' txn.transaction_id %}" class="btn btn-prm-primary rounded-pill px-4">Receipt Slip</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

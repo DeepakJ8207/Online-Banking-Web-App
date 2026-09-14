@@ -1,0 +1,237 @@
+/* ====================================================
+   PRIME RESERVE BANK - Master Design System
+   "Banking Made Simple, Secure & Smarter."
+   ==================================================== */
+
+:root {
+  --prm-navy-900: #061122;
+  --prm-navy-800: #0a192f;
+  --prm-navy-700: #0d2346;
+  --prm-navy-600: #132f5d;
+  --prm-blue-600: #1a56db;
+  --prm-blue-500: #2563eb;
+  --prm-blue-400: #3b82f6;
+  --prm-blue-100: #e0e7ff;
+  --prm-blue-50:  #eff6ff;
+
+  --prm-emerald-600: #059669;
+  --prm-emerald-500: #10b981;
+  --prm-emerald-50:  #ecfdf5;
+
+  --prm-amber-600: #d97706;
+  --prm-amber-500: #f59e0b;
+  --prm-amber-50:  #fffbeb;
+
+  --prm-rose-600: #dc2626;
+  --prm-rose-500: #ef4444;
+  --prm-rose-50:  #fef2f2;
+
+  --prm-slate-900: #0f172a;
+  --prm-slate-800: #1e293b;
+  --prm-slate-700: #334155;
+  --prm-slate-600: #475569;
+  --prm-slate-500: #64748b;
+  --prm-slate-400: #94a3b8;
+  --prm-slate-200: #e2e8f0;
+  --prm-slate-100: #f1f5f9;
+  --prm-slate-50:  #f8fafc;
+
+  --prm-font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --prm-font-heading: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+
+  --prm-radius-sm: 8px;
+  --prm-radius-md: 12px;
+  --prm-radius-lg: 16px;
+  --prm-radius-xl: 24px;
+
+  --prm-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+  --prm-shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --prm-shadow-lg: 0 10px 25px -5px rgba(13, 35, 70, 0.12), 0 8px 10px -6px rgba(13, 35, 70, 0.08);
+  --prm-shadow-glow: 0 0 20px rgba(26, 86, 219, 0.25);
+}
+
+body {
+  font-family: var(--prm-font-sans);
+  color: var(--prm-slate-800);
+  background-color: #f4f7fb;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6, .font-heading {
+  font-family: var(--prm-font-heading);
+  font-weight: 700;
+  color: var(--prm-navy-900);
+  letter-spacing: -0.02em;
+}
+
+/* Brand Colors Utilities */
+.bg-prm-navy { background-color: var(--prm-navy-800) !important; color: #fff; }
+.bg-prm-dark { background-color: var(--prm-navy-900) !important; color: #fff; }
+.bg-prm-gradient {
+  background: linear-gradient(135deg, #0a192f 0%, #0d2346 50%, #1a56db 100%) !important;
+  color: #fff;
+}
+.bg-prm-card-gradient {
+  background: linear-gradient(135deg, #0d2346 0%, #1a365d 100%) !important;
+  color: #fff;
+}
+.bg-prm-gold-gradient {
+  background: linear-gradient(135deg, #b45309 0%, #d97706 50%, #f59e0b 100%) !important;
+  color: #fff;
+}
+.text-prm-primary { color: var(--prm-blue-600) !important; }
+.text-prm-navy { color: var(--prm-navy-800) !important; }
+.text-prm-emerald { color: var(--prm-emerald-600) !important; }
+.text-prm-amber { color: var(--prm-amber-600) !important; }
+.text-prm-rose { color: var(--prm-rose-600) !important; }
+
+/* Custom Buttons */
+.btn-prm-primary {
+  background: linear-gradient(135deg, #1a56db 0%, #2563eb 100%);
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  padding: 0.65rem 1.4rem;
+  border-radius: var(--prm-radius-md);
+  box-shadow: 0 4px 10px rgba(26, 86, 219, 0.25);
+  transition: all 0.25s ease;
+}
+.btn-prm-primary:hover {
+  background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(26, 86, 219, 0.35);
+}
+
+.btn-prm-secondary {
+  background-color: #fff;
+  color: var(--prm-navy-800);
+  border: 1.5px solid var(--prm-slate-200);
+  font-weight: 600;
+  padding: 0.65rem 1.4rem;
+  border-radius: var(--prm-radius-md);
+  transition: all 0.2s ease;
+}
+.btn-prm-secondary:hover {
+  background-color: var(--prm-slate-50);
+  border-color: var(--prm-blue-400);
+  color: var(--prm-blue-600);
+}
+
+.btn-prm-gold {
+  background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  border-radius: var(--prm-radius-md);
+  box-shadow: 0 4px 10px rgba(217, 119, 6, 0.25);
+  transition: all 0.2s ease;
+}
+.btn-prm-gold:hover {
+  background: linear-gradient(135deg, #b45309 0%, #d97706 100%);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+/* Custom Cards */
+.card-prm {
+  background-color: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: var(--prm-radius-lg);
+  box-shadow: var(--prm-shadow-md);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.card-prm-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--prm-shadow-lg);
+  border-color: rgba(26, 86, 219, 0.3);
+}
+
+/* Debit Card Style Element */
+.bank-debit-card {
+  background: linear-gradient(135deg, #0a192f 0%, #0d2346 50%, #1a56db 100%);
+  border-radius: 20px;
+  color: #fff;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(10, 25, 47, 0.35);
+}
+.bank-debit-card::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+/* Badges */
+.badge-prm-success {
+  background-color: var(--prm-emerald-50);
+  color: var(--prm-emerald-600);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  font-weight: 600;
+  padding: 0.35rem 0.65rem;
+  border-radius: 20px;
+}
+.badge-prm-danger {
+  background-color: var(--prm-rose-50);
+  color: var(--prm-rose-600);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  font-weight: 600;
+  padding: 0.35rem 0.65rem;
+  border-radius: 20px;
+}
+.badge-prm-info {
+  background-color: var(--prm-blue-50);
+  color: var(--prm-blue-600);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  font-weight: 600;
+  padding: 0.35rem 0.65rem;
+  border-radius: 20px;
+}
+.badge-prm-warning {
+  background-color: var(--prm-amber-50);
+  color: var(--prm-amber-600);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  font-weight: 600;
+  padding: 0.35rem 0.65rem;
+  border-radius: 20px;
+}
+
+/* Educational Notice Bar */
+.edu-disclaimer-banner {
+  background: linear-gradient(90deg, #1e293b 0%, #0f172a 100%);
+  color: #cbd5e1;
+  font-size: 0.8rem;
+  padding: 6px 16px;
+  border-bottom: 1px solid #334155;
+  text-align: center;
+}
+
+/* Form Styles */
+.form-control, .form-select {
+  border-radius: var(--prm-radius-md);
+  border: 1.5px solid var(--prm-slate-200);
+  padding: 0.65rem 1rem;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--prm-blue-500);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.tracking-widest { letter-spacing: 0.3em; }
+.letter-spacing-lg { letter-spacing: 0.2em; }
+
+/* Responsive utility */
+@media (max-width: 767.98px) {
+  .bank-debit-card { padding: 18px; }
+  h1 { font-size: 1.85rem; }
+  h2 { font-size: 1.5rem; }
+}

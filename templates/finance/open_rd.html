@@ -1,0 +1,220 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+
+{% block title %}Open Recurring Deposit — PRIME RESERVE BANK{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid p-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a href="{% url 'finance:deposits' %}" class="btn btn-sm btn-light rounded-pill px-3 mb-2">
+                <i class="bi bi-arrow-left me-1"></i> Back to Deposits
+            </a>
+            <h4 class="fw-bold text-prm-navy mb-1 font-heading">Start Recurring Deposit (RD)</h4>
+            <p class="text-secondary small mb-0">Build wealth with disciplined monthly savings and guaranteed interest</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card card-prm p-4 p-md-5 bg-white">
+                
+                <form method="post" id="openRdForm">
+                    {% csrf_token %}
+
+                    <!-- 1. Select Debit Account -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-prm-navy">Select Linked Account (Monthly Auto-Debit)</label>
+                        {{ form.linked_account }}
+                    </div>
+
+                    <!-- 2. Monthly Deposit Amount -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-prm-navy">Monthly Installment Amount (₹)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light fw-bold text-prm-navy">₹</span>
+                            <input type="number" name="monthly_deposit" id="rdMonthlyInput" class="form-control form-control-lg fw-bold" placeholder="5000" min="500" max="1000000" step="500" value="5000" required>
+                        </div>
+                        <small class="text-muted">Minimum monthly installment: ₹500 | Debited on 1st of every month</small>
+                    </div>
+
+                    <!-- 3. Tenure Selection Pills -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-prm-navy mb-2">Select Tenure</label>
+                        <div class="row g-2">
+                            <div class="col-6 col-sm-4 col-md">
+                                <input type="radio" class="btn-check" name="tenure_months" id="rdTenure6" value="6" autocomplete="off" onchange="updateRdCalculations()">
+                                <label class="btn btn-outline-primary w-100 p-2 rounded-3 text-center" for="rdTenure6">
+                                    <div class="fw-bold">6 Months</div>
+                                    <small class="text-success fw-semibold">6.25% p.a.</small>
+                                </label>
+                            </div>
+                            <div class="col-6 col-sm-4 col-md">
+                                <input type="radio" class="btn-check" name="tenure_months" id="rdTenure12" value="12" autocomplete="off" checked onchange="updateRdCalculations()">
+                                <label class="btn btn-outline-primary w-100 p-2 rounded-3 text-center" for="rdTenure12">
+                                    <div class="fw-bold">12 Months</div>
+                                    <small class="text-success fw-semibold">7.00% p.a.</small>
+                                </label>
+                            </div>
+                            <div class="col-6 col-sm-4 col-md">
+                                <input type="radio" class="btn-check" name="tenure_months" id="rdTenure24" value="24" autocomplete="off" onchange="updateRdCalculations()">
+                                <label class="btn btn-outline-primary w-100 p-2 rounded-3 text-center" for="rdTenure24">
+                                    <div class="fw-bold">24 Months</div>
+                                    <small class="text-success fw-semibold">7.25% p.a.</small>
+                                </label>
+                            </div>
+                            <div class="col-6 col-sm-4 col-md">
+                                <input type="radio" class="btn-check" name="tenure_months" id="rdTenure36" value="36" autocomplete="off" onchange="updateRdCalculations()">
+                                <label class="btn btn-outline-primary w-100 p-2 rounded-3 text-center" for="rdTenure36">
+                                    <div class="fw-bold">36 Months</div>
+                                    <small class="text-success fw-semibold">7.15% p.a.</small>
+                                </label>
+                            </div>
+                            <div class="col-6 col-sm-4 col-md">
+                                <input type="radio" class="btn-check" name="tenure_months" id="rdTenure60" value="60" autocomplete="off" onchange="updateRdCalculations()">
+                                <label class="btn btn-outline-primary w-100 p-2 rounded-3 text-center" for="rdTenure60">
+                                    <div class="fw-bold">60 Months</div>
+                                    <small class="text-success fw-semibold">6.85% p.a.</small>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Dynamic Live Calculation Summary Card -->
+                    <div class="card bg-prm-card-gradient text-white p-4 rounded-4 mb-4 shadow-sm">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="small text-white-50 text-uppercase fw-bold tracking-wider">Recurring Deposit Plan</span>
+                            <span class="badge bg-warning text-dark fw-bold" id="rdRateBadge">7.00% Interest Rate</span>
+                        </div>
+                        
+                        <div class="row g-3">
+                            <div class="col-6 col-sm-4">
+                                <small class="text-white-50 d-block">Total Deposit</small>
+                                <span class="fs-5 fw-bold font-heading text-white" id="rdTotalDepositDisplay">₹60,000</span>
+                            </div>
+                            <div class="col-6 col-sm-4">
+                                <small class="text-white-50 d-block">Interest Earned</small>
+                                <span class="fs-5 fw-bold font-heading text-warning" id="rdInterestEarnedDisplay">+₹2,275</span>
+                            </div>
+                            <div class="col-12 col-sm-4">
+                                <small class="text-white-50 d-block">Maturity Value</small>
+                                <span class="fs-5 fw-bold font-heading text-success" id="rdMaturityAmountDisplay">₹62,275</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. Actions -->
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <a href="{% url 'finance:deposits' %}" class="btn btn-light rounded-pill px-4">Cancel</a>
+                        <button type="button" class="btn btn-prm-primary btn-lg rounded-pill px-5 shadow" onclick="openRdReviewModal()">
+                            <i class="bi bi-shield-check me-2"></i> Review RD
+                        </button>
+                    </div>
+
+                    <!-- Review & Confirm Modal -->
+                    <div class="modal fade" id="rdReviewModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                                <div class="bg-prm-navy p-4 text-white text-center">
+                                    <h5 class="fw-bold font-heading mb-1 text-white">Review Recurring Deposit</h5>
+                                    <p class="text-white-50 small mb-0">Confirm your RD plan terms before booking</p>
+                                </div>
+                                <div class="modal-body p-4 bg-white">
+                                    <div class="list-group list-group-flush mb-4 small">
+                                        <div class="list-group-item d-flex justify-content-between px-0 py-2">
+                                            <span class="text-muted">Monthly Installment:</span>
+                                            <strong class="text-prm-navy font-monospace" id="modalRdMonthly">₹5,000/month</strong>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between px-0 py-2">
+                                            <span class="text-muted">Tenure:</span>
+                                            <strong class="text-prm-navy" id="modalRdTenure">12 Months</strong>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between px-0 py-2">
+                                            <span class="text-muted">Total Investment:</span>
+                                            <strong class="text-dark" id="modalRdTotal">₹60,000</strong>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between px-0 py-2">
+                                            <span class="text-muted">Interest Rate:</span>
+                                            <strong class="text-warning" id="modalRdRate">7.00% p.a.</strong>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between px-0 py-2">
+                                            <span class="text-muted">Guaranteed Maturity Value:</span>
+                                            <strong class="text-success fs-6" id="modalRdMaturity">₹62,275</strong>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4 p-3 bg-light rounded-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <label class="form-label small fw-bold text-prm-navy mb-0">Enter Transaction PIN</label>
+                                            <small class="text-muted">Demo PIN: <b>1234</b></small>
+                                        </div>
+                                        <input type="password" name="transaction_pin" id="modalRdTxnPin" class="form-control text-center font-monospace fs-5 tracking-widest" maxlength="4" placeholder="••••" required>
+                                    </div>
+
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Modify</button>
+                                        <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold">
+                                            <i class="bi bi-check-circle-fill me-1"></i> Confirm & Start RD
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const rdRates = {
+    6: 6.25,
+    12: 7.00,
+    24: 7.25,
+    36: 7.15,
+    60: 6.85
+};
+
+function updateRdCalculations() {
+    const monthly = parseFloat(document.getElementById('rdMonthlyInput').value) || 5000;
+    const tenureRadio = document.querySelector('input[name="tenure_months"]:checked');
+    const tenureMonths = parseInt(tenureRadio ? tenureRadio.value : 12);
+    const rate = rdRates[tenureMonths] || 7.00;
+
+    const totalDeposit = monthly * tenureMonths;
+    const r = rate / 100.0;
+    const interest = monthly * tenureMonths * (tenureMonths + 1) / 24.0 * r;
+    const maturity = totalDeposit + interest;
+
+    document.getElementById('rdRateBadge').textContent = rate.toFixed(2) + '% Interest Rate';
+    document.getElementById('rdTotalDepositDisplay').textContent = '₹' + Math.round(totalDeposit).toLocaleString('en-IN');
+    document.getElementById('rdInterestEarnedDisplay').textContent = '+₹' + Math.round(interest).toLocaleString('en-IN');
+    document.getElementById('rdMaturityAmountDisplay').textContent = '₹' + Math.round(maturity).toLocaleString('en-IN');
+
+    document.getElementById('modalRdMonthly').textContent = '₹' + Math.round(monthly).toLocaleString('en-IN') + '/mo';
+    document.getElementById('modalRdTenure').textContent = tenureMonths + ' Months';
+    document.getElementById('modalRdTotal').textContent = '₹' + Math.round(totalDeposit).toLocaleString('en-IN');
+    document.getElementById('modalRdRate').textContent = rate.toFixed(2) + '% p.a.';
+    document.getElementById('modalRdMaturity').textContent = '₹' + Math.round(maturity).toLocaleString('en-IN');
+}
+
+function openRdReviewModal() {
+    const monthly = parseFloat(document.getElementById('rdMonthlyInput').value);
+    if (!monthly || monthly < 500) {
+        alert('Please enter a valid monthly installment of at least ₹500.');
+        return;
+    }
+    updateRdCalculations();
+    const modal = new bootstrap.Modal(document.getElementById('rdReviewModal'));
+    modal.show();
+}
+
+document.getElementById('rdMonthlyInput').addEventListener('input', updateRdCalculations);
+document.addEventListener('DOMContentLoaded', updateRdCalculations);
+</script>
+{% endblock %}

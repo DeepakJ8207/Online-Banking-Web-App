@@ -1,0 +1,29 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+
+{% block title %}Delete Beneficiary — PRIME RESERVE BANK{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid p-0">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card card-prm p-4 p-md-5 text-center bg-white">
+                <div class="bg-danger-subtle text-danger rounded-circle p-3 d-inline-flex mx-auto mb-3" style="width: 64px; height: 64px; align-items: center; justify-content: center;">
+                    <i class="bi bi-trash-fill fs-2"></i>
+                </div>
+                <h4 class="fw-bold text-prm-navy mb-2">Remove Beneficiary?</h4>
+                <p class="text-secondary small mb-4">
+                    Are you sure you want to remove <b>{{ beneficiary.beneficiary_name }}</b> (A/c: {{ beneficiary.masked_account_number }}) from your saved beneficiaries list?
+                </p>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="{% url 'beneficiaries:list' %}" class="btn btn-light rounded-pill px-4">Cancel</a>
+                        <button type="submit" class="btn btn-danger rounded-pill px-4">Yes, Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

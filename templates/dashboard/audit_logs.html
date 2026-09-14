@@ -1,0 +1,64 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+
+{% block title %}Activity & Audit Trail — PRIME RESERVE BANK{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid p-0">
+    <div class="mb-4">
+        <h4 class="fw-bold text-prm-navy mb-1 font-heading">Security Audit & Activity Trail</h4>
+        <p class="text-secondary small mb-0">Complete historical security log of logins, transfers, PIN updates, and account actions</p>
+    </div>
+
+    <div class="card card-prm overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small text-secondary">
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Action Performed</th>
+                        <th>Details / Description</th>
+                        <th>IP Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in page_obj %}
+                        <tr>
+                            <td>
+                                <div class="fw-semibold small text-prm-navy">{{ log.timestamp|date:"d M Y" }}</div>
+                                <div class="text-muted" style="font-size: 0.72rem;">{{ log.timestamp|date:"h:i:s A" }}</div>
+                            </td>
+                            <td>
+                                <span class="badge {% if 'LOGIN' in log.action or 'LOGOUT' in log.action %}bg-secondary-subtle text-dark{% elif 'TRANSFER' in log.action %}bg-primary-subtle text-primary{% elif 'PASSWORD' in log.action %}bg-warning-subtle text-warning{% else %}bg-light text-secondary border{% endif %} fw-semibold">
+                                    {{ log.get_action_display }}
+                                </span>
+                            </td>
+                            <td class="small text-secondary">{{ log.description }}</td>
+                            <td class="small font-monospace text-muted">{{ log.ip_address|default:"127.0.0.1" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-muted">No audit records found.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                {% endif %}
+                <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+                {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+{% endblock %}

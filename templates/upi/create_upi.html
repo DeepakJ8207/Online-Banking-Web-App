@@ -1,0 +1,65 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+
+{% block title %}Create UPI ID — PRIME RESERVE BANK{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid p-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a href="{% url 'upi:home' %}" class="btn btn-sm btn-light rounded-pill px-3 mb-2">
+                <i class="bi bi-arrow-left me-1"></i> Back to UPI
+            </a>
+            <h4 class="fw-bold text-prm-navy mb-1 font-heading">Create New UPI Virtual Payment Address (VPA)</h4>
+            <p class="text-secondary small mb-0">Link a custom handle with your Prime Reserve Bank account</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card card-prm p-4 p-md-5 bg-white">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-prm-navy">Link Bank Account</label>
+                        {{ form.bank_account }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-prm-navy">Custom Handle</label>
+                        <div class="input-group">
+                            {{ form.custom_handle }}
+                            <span class="input-group-text bg-light fw-bold text-primary font-monospace">@primereserve</span>
+                        </div>
+                        <small class="text-muted">Only lowercase letters, numbers, dots, and hyphens permitted.</small>
+                        {% if form.custom_handle.errors %}
+                            <div class="text-danger small mt-1">{{ form.custom_handle.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-prm-navy">Set 4 or 6-Digit UPI PIN</label>
+                            {{ form.upi_pin }}
+                            {% if form.upi_pin.errors %}<div class="text-danger small mt-1">{{ form.upi_pin.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-prm-navy">Confirm UPI PIN</label>
+                            {{ form.confirm_upi_pin }}
+                            {% if form.confirm_upi_pin.errors %}<div class="text-danger small mt-1">{{ form.confirm_upi_pin.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'upi:home' %}" class="btn btn-light rounded-pill px-4">Cancel</a>
+                        <button type="submit" class="btn btn-warning text-dark fw-bold rounded-pill px-5 shadow-sm">
+                            <i class="bi bi-patch-check-fill me-1"></i> Create UPI ID
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

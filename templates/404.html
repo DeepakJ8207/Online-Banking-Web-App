@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}404 — Page Not Found — PRIME RESERVE BANK{% endblock %}
+
+{% block layout %}
+<div class="min-vh-100 d-flex flex-column justify-content-center align-items-center text-center p-4 bg-light">
+    <div class="card card-prm p-5 shadow-lg border-0 bg-white" style="max-width: 540px;">
+        <div class="bg-primary-subtle text-primary rounded-circle p-4 d-inline-flex mx-auto mb-3" style="width: 80px; height: 80px; align-items: center; justify-content: center;">
+            <i class="bi bi-compass fs-1"></i>
+        </div>
+        <h1 class="display-4 fw-bold font-heading text-prm-navy mb-2">404</h1>
+        <h4 class="fw-bold text-prm-navy mb-3">Page Not Found</h4>
+        <p class="text-secondary mb-4">
+            The banking page or resource you requested could not be located. It may have moved or the link might be incorrect.
+        </p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{% url 'accounts:home' %}" class="btn btn-outline-secondary rounded-pill px-4">Home</a>
+            <a href="{% url 'dashboard:home' %}" class="btn btn-prm-primary rounded-pill px-4">Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

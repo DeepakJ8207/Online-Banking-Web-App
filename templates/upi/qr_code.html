@@ -1,0 +1,55 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+
+{% block title %}My UPI QR Code — {{ upi_obj.upi_id }} — PRIME RESERVE BANK{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid p-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a href="{% url 'upi:home' %}" class="btn btn-sm btn-light rounded-pill px-3 mb-2">
+                <i class="bi bi-arrow-left me-1"></i> Back to UPI
+            </a>
+            <h4 class="fw-bold text-prm-navy mb-1 font-heading">Personal UPI QR Code</h4>
+            <p class="text-secondary small mb-0">Dynamic simulated QR code linked to your Prime Reserve Bank account</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card card-prm p-4 p-md-5 text-center bg-white shadow-lg">
+                <!-- Bank Branding inside QR Card -->
+                <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
+                    <div class="bg-warning text-dark rounded-3 d-flex align-items-center justify-content-center p-2" style="width: 36px; height: 36px;">
+                        <i class="bi bi-bank2 fs-5"></i>
+                    </div>
+                    <div class="font-heading fw-bold text-prm-navy">PRIME RESERVE BANK</div>
+                </div>
+
+                <h5 class="fw-bold text-prm-navy mb-1">{{ user.get_full_name|default:user.username }}</h5>
+                <div class="badge bg-light text-primary font-monospace fs-6 px-3 py-2 border my-2">
+                    {{ upi_obj.upi_id }}
+                </div>
+
+                <!-- Dynamic QR Code Container -->
+                <div class="p-3 my-3 bg-white rounded-4 border d-inline-block shadow-sm">
+                    <img src="{% url 'upi:qr_image' upi_obj.upi_id %}" alt="UPI QR Code" class="img-fluid rounded-3" style="max-width: 220px;">
+                </div>
+
+                <div class="small text-muted mb-4">
+                    <i class="bi bi-info-circle me-1"></i> Scan with any simulated UPI scanner or send to this UPI VPA.
+                </div>
+
+                <div class="d-flex justify-content-center gap-2">
+                    <button class="btn btn-outline-primary rounded-pill px-3" onclick="copyToClipboard('{{ upi_obj.upi_id }}', 'UPI ID copied to clipboard!')">
+                        <i class="bi bi-copy me-1"></i> Copy UPI ID
+                    </button>
+                    <a href="{% url 'upi:qr_image' upi_obj.upi_id %}" download="PRMB_QR_{{ upi_obj.upi_id }}.png" class="btn btn-prm-primary rounded-pill px-4">
+                        <i class="bi bi-download me-1"></i> Download QR
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

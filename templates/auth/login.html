@@ -1,0 +1,129 @@
+{% extends "base_auth.html" %}
+{% load static %}
+
+{% block title %}Internet Banking Login — PRIME RESERVE BANK{% endblock %}
+
+{% block auth_content %}
+<div class="col-md-9 col-lg-7 col-xl-6">
+    <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+        <!-- Header Banner -->
+        <div class="p-4 text-center" style="background: linear-gradient(135deg, #0b1f3a 0%, #173860 100%); color: #ffffff;">
+            <div class="bg-warning text-dark rounded-3 d-inline-flex align-items-center justify-content-center p-2 mb-2 shadow-sm" style="width: 46px; height: 46px;">
+                <i class="bi bi-bank2 fs-4"></i>
+            </div>
+            <h4 class="font-heading fw-bold mb-1">Internet Banking Login</h4>
+            <p class="text-white-50 small mb-0">Select a 1-click demo account below or enter your credentials</p>
+        </div>
+
+        <div class="card-body p-4 p-md-5 bg-white">
+            
+            <!-- 1-Click Demo Login Box -->
+            <div class="p-3 bg-light rounded-4 mb-4 border">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="small fw-bold text-dark"><i class="bi bi-lightning-charge-fill text-warning"></i> Instant 1-Click Demo Logins:</span>
+                    <span class="badge bg-success text-white" style="font-size: 0.65rem;">Click to Sign In Instantly</span>
+                </div>
+                
+                <div class="row g-2">
+                    <!-- Demo User 1: Aarav -->
+                    <div class="col-12 col-sm-6">
+                        <button type="button" class="btn btn-white border w-100 p-2 text-start rounded-3 shadow-xs hover-shadow d-flex align-items-center justify-content-between" onclick="loginDirectly('demo_user', 'Demo@12345')">
+                            <div>
+                                <div class="fw-bold text-dark small"><i class="bi bi-person-fill text-primary me-1"></i> Aarav (Customer)</div>
+                                <div class="text-success small fw-semibold">Balance: ₹1,25,450</div>
+                            </div>
+                            <span class="btn btn-sm btn-primary rounded-pill py-0 px-2" style="font-size: 0.75rem;">Login ⚡</span>
+                        </button>
+                    </div>
+
+                    <!-- Demo User 2: Priya -->
+                    <div class="col-12 col-sm-6">
+                        <button type="button" class="btn btn-white border w-100 p-2 text-start rounded-3 shadow-xs hover-shadow d-flex align-items-center justify-content-between" onclick="loginDirectly('priya_sharma', 'Demo@12345')">
+                            <div>
+                                <div class="fw-bold text-dark small"><i class="bi bi-person-fill text-info me-1"></i> Priya (Customer)</div>
+                                <div class="text-success small fw-semibold">Balance: ₹85,200</div>
+                            </div>
+                            <span class="btn btn-sm btn-primary rounded-pill py-0 px-2" style="font-size: 0.75rem;">Login ⚡</span>
+                        </button>
+                    </div>
+
+                    <!-- Demo User 3: Rahul -->
+                    <div class="col-12 col-sm-6">
+                        <button type="button" class="btn btn-white border w-100 p-2 text-start rounded-3 shadow-xs hover-shadow d-flex align-items-center justify-content-between" onclick="loginDirectly('rahul_verma', 'Demo@12345')">
+                            <div>
+                                <div class="fw-bold text-dark small"><i class="bi bi-person-fill text-secondary me-1"></i> Rahul (Customer)</div>
+                                <div class="text-success small fw-semibold">Balance: ₹62,750</div>
+                            </div>
+                            <span class="btn btn-sm btn-primary rounded-pill py-0 px-2" style="font-size: 0.75rem;">Login ⚡</span>
+                        </button>
+                    </div>
+
+                    <!-- Demo User 4: Admin / Manager -->
+                    <div class="col-12 col-sm-6">
+                        <button type="button" class="btn btn-white border w-100 p-2 text-start rounded-3 shadow-xs hover-shadow d-flex align-items-center justify-content-between" onclick="loginDirectly('admin', 'Admin@12345')">
+                            <div>
+                                <div class="fw-bold text-dark small"><i class="bi bi-shield-shaded text-warning me-1"></i> Bank Manager (Admin)</div>
+                                <div class="text-muted small">View all balances & logs</div>
+                            </div>
+                            <span class="btn btn-sm btn-dark rounded-pill py-0 px-2" style="font-size: 0.75rem;">Login ⚡</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="position-relative text-center my-4">
+                <hr class="text-muted">
+                <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">or enter credentials manually</span>
+            </div>
+
+            <form method="post" action="{% url 'accounts:login' %}" novalidate>
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label for="login-username" class="form-label small fw-semibold text-dark">User ID / Username</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-person-fill"></i></span>
+                        {{ form.username }}
+                    </div>
+                    {% if form.username.errors %}
+                        <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label for="login-password" class="form-label small fw-semibold text-dark mb-0">Password</label>
+                        <a href="{% url 'accounts:forgot_password' %}" class="small text-primary text-decoration-none">Forgot Password?</a>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-key-fill"></i></span>
+                        {{ form.password }}
+                        <button class="btn btn-outline-secondary border-start-0 toggle-password-btn" type="button" data-target="login-password">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    {% if form.password.errors %}
+                        <div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-check mb-4">
+                    {{ form.remember_me }}
+                    <label class="form-check-label small text-secondary" for="rememberMe">
+                        Keep me signed in for 14 days
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill mb-3 fw-bold">
+                    <i class="bi bi-lock-fill me-2"></i> Secure Login
+                </button>
+
+                <div class="text-center">
+                    <span class="small text-secondary">New customer? </span>
+                    <a href="{% url 'accounts:register' %}" class="small text-primary fw-semibold text-decoration-none">Open a New Digital Bank Account</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,314 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Dashboard — PRIME RESERVE BANK{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid p-0">
+
+    <!-- Welcome & Profile Summary Bar -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold text-prm-navy mb-1 font-heading">
+                {{ greeting }}, {{ user.get_full_name|default:user.username }}!
+            </h3>
+            <div class="d-flex flex-wrap align-items-center gap-2 small text-secondary">
+                <span>Customer ID: <strong class="text-prm-navy">{{ user.profile.cif_number|default:"98765432101" }}</strong></span>
+                <span>•</span>
+                <span>Branch: <strong class="text-prm-navy">{{ primary_account.branch.branch_name|default:"Mumbai Fort Branch" }}</strong></span>
+                <span>•</span>
+                <span class="badge bg-success-subtle text-success"><i class="bi bi-shield-check me-1"></i> KYC {{ user.profile.kyc_status|default:"VERIFIED" }}</span>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <a href="{% url 'transfers:bank_transfer' %}" class="btn btn-prm-primary rounded-pill px-3 shadow-sm">
+                <i class="bi bi-send-fill me-1"></i> Send Money
+            </a>
+            {% if primary_account %}
+                <a href="{% url 'transactions:download_statement' %}?account_id={{ primary_account.id }}" class="btn btn-prm-secondary rounded-pill px-3 shadow-sm">
+                    <i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> Statement
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Stat Cards Row -->
+    <div class="row g-3 mb-4">
+        <!-- Available Balance Card -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card-prm h-100 bg-prm-card-gradient text-white">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="text-white-50 small text-uppercase tracking-wider fw-bold">Primary Account</div>
+                    <span class="badge bg-warning text-dark fw-bold">{{ primary_account.get_account_type_display|default:"Savings" }}</span>
+                </div>
+                <div class="display-6 fw-bold mb-2 font-heading text-white">
+                    ₹{{ primary_account.balance|default:"0.00"|intcomma }}
+                </div>
+                <div class="d-flex justify-content-between align-items-center small text-white-50 border-top border-white-50 pt-2">
+                    <span class="font-monospace">{{ primary_account.masked_account_number|default:"XXXX XXXX 0045" }}</span>
+                    {% if primary_account %}
+                        <a href="{% url 'banking:account_details' primary_account.id %}" class="text-warning text-decoration-none fw-semibold">Details <i class="bi bi-arrow-right"></i></a>
+                    {% else %}
+                        <span class="text-white-50">Active</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Credits Card -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card-prm h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-secondary small fw-bold text-uppercase">Monthly Credits</span>
+                    <div class="stat-icon-wrapper bg-success-subtle text-success">
+                        <i class="bi bi-arrow-down-left"></i>
+                    </div>
+                </div>
+                <h3 class="fw-bold text-success mb-1 font-heading">+₹{{ monthly_credits|intcomma }}</h3>
+                <small class="text-muted"><i class="bi bi-calendar3 me-1"></i> Current Month Inflow</small>
+            </div>
+        </div>
+
+        <!-- Monthly Debits Card -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card-prm h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-secondary small fw-bold text-uppercase">Monthly Debits</span>
+                    <div class="stat-icon-wrapper bg-danger-subtle text-danger">
+                        <i class="bi bi-arrow-up-right"></i>
+                    </div>
+                </div>
+                <h3 class="fw-bold text-danger mb-1 font-heading">-₹{{ monthly_debits|intcomma }}</h3>
+                <small class="text-muted"><i class="bi bi-credit-card me-1"></i> Total Spending & Transfers</small>
+            </div>
+        </div>
+
+        <!-- UPI Handle Card -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card-prm h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-secondary small fw-bold text-uppercase">Primary UPI VPA</span>
+                    <div class="stat-icon-wrapper bg-primary-subtle text-primary">
+                        <i class="bi bi-qr-code"></i>
+                    </div>
+                </div>
+                <div class="fw-bold text-prm-navy font-monospace mb-1 text-truncate" style="font-size: 0.95rem;">
+                    {{ primary_upi.upi_id|default:"demo_user@primereserve" }}
+                </div>
+                <div class="d-flex gap-2 mt-2">
+                    <button class="btn btn-sm btn-outline-secondary rounded-pill py-0 px-2 small" onclick="copyToClipboard('{{ primary_upi.upi_id|default:"demo_user@primereserve" }}', 'UPI ID copied!')">
+                        <i class="bi bi-copy me-1"></i> Copy
+                    </button>
+                    {% if primary_upi %}
+                        <a href="{% url 'upi:qr_code' primary_upi.upi_id %}" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2 small">
+                            <i class="bi bi-qr-code-scan me-1"></i> QR
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Services Ribbon -->
+    <div class="card card-prm p-3 mb-4 bg-white">
+        <div class="row g-2 text-center">
+            <div class="col-4 col-md-2">
+                <a href="{% url 'transfers:bank_transfer' %}" class="d-flex flex-column align-items-center text-decoration-none text-prm-navy p-2 rounded-3 hover-bg-light">
+                    <div class="bg-primary-subtle text-primary rounded-circle p-2 mb-1" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-bank fs-5"></i>
+                    </div>
+                    <span class="small fw-semibold">Bank Transfer</span>
+                </a>
+            </div>
+            <div class="col-4 col-md-2">
+                <a href="{% url 'transfers:mobile_transfer' %}" class="d-flex flex-column align-items-center text-decoration-none text-prm-navy p-2 rounded-3 hover-bg-light">
+                    <div class="bg-success-subtle text-success rounded-circle p-2 mb-1" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-phone fs-5"></i>
+                    </div>
+                    <span class="small fw-semibold">Mobile Pay</span>
+                </a>
+            </div>
+            <div class="col-4 col-md-2">
+                <a href="{% url 'transfers:upi_transfer' %}" class="d-flex flex-column align-items-center text-decoration-none text-prm-navy p-2 rounded-3 hover-bg-light">
+                    <div class="bg-warning-subtle text-warning rounded-circle p-2 mb-1" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-qr-code fs-5"></i>
+                    </div>
+                    <span class="small fw-semibold">UPI Transfer</span>
+                </a>
+            </div>
+            <div class="col-4 col-md-2">
+                <a href="{% url 'bills:home' %}" class="d-flex flex-column align-items-center text-decoration-none text-prm-navy p-2 rounded-3 hover-bg-light">
+                    <div class="bg-danger-subtle text-danger rounded-circle p-2 mb-1" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-receipt-cutoff fs-5"></i>
+                    </div>
+                    <span class="small fw-semibold">Pay Bills</span>
+                </a>
+            </div>
+            <div class="col-4 col-md-2">
+                <a href="{% url 'finance:loans' %}" class="d-flex flex-column align-items-center text-decoration-none text-prm-navy p-2 rounded-3 hover-bg-light">
+                    <div class="bg-info-subtle text-info rounded-circle p-2 mb-1" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-cash-stack fs-5"></i>
+                    </div>
+                    <span class="small fw-semibold">Loans</span>
+                </a>
+            </div>
+            <div class="col-4 col-md-2">
+                <a href="{% url 'finance:deposits' %}" class="d-flex flex-column align-items-center text-decoration-none text-prm-navy p-2 rounded-3 hover-bg-light">
+                    <div class="bg-secondary-subtle text-dark rounded-circle p-2 mb-1" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-piggy-bank fs-5"></i>
+                    </div>
+                    <span class="small fw-semibold">FD & RD</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Charts Row -->
+    <div class="row g-4 mb-4">
+        <!-- Monthly Income vs Expense Chart -->
+        <div class="col-lg-8">
+            <div class="card card-prm p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="fw-bold text-prm-navy mb-0">Income vs Expense Trend</h5>
+                        <small class="text-muted">Dynamic transaction movements computed from MySQL database</small>
+                    </div>
+                    <span class="badge bg-light text-secondary border">Last 6 Months</span>
+                </div>
+                <div style="height: 280px; position: relative;">
+                    <canvas id="monthlyIncomeExpenseChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Credit vs Debit Split -->
+        <div class="col-lg-4">
+            <div class="card card-prm p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold text-prm-navy mb-0">Credit vs Debit Ratio</h5>
+                    <span class="badge bg-light text-secondary border">Overall</span>
+                </div>
+                <div style="height: 240px; position: relative;">
+                    <canvas id="creditDebitDoughnutChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secondary Row: Recent Transactions & Quick Beneficiaries -->
+    <div class="row g-4 mb-4">
+        <!-- Recent Transactions -->
+        <div class="col-lg-8">
+            <div class="card card-prm p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold text-prm-navy mb-0">Recent Transactions</h5>
+                    <a href="{% url 'transactions:history' %}" class="btn btn-sm btn-outline-primary rounded-pill">View All</a>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr class="small text-secondary">
+                                <th>Date & Ref</th>
+                                <th>Description</th>
+                                <th>Type</th>
+                                <th class="text-end">Amount</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for txn in recent_transactions %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-semibold small text-prm-navy">{{ txn.timestamp|date:"d M Y" }}</div>
+                                        <div class="text-muted font-monospace" style="font-size: 0.7rem;">{{ txn.reference_number }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold small text-truncate" style="max-width: 200px;">
+                                            {% if txn.sender_account.user == user %}
+                                                To {{ txn.receiver_name }}
+                                            {% else %}
+                                                From {{ txn.sender_name }}
+                                            {% endif %}
+                                        </div>
+                                        <div class="text-muted small" style="font-size: 0.72rem;">{{ txn.remarks|truncatechars:35 }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-secondary border fw-normal" style="font-size: 0.7rem;">
+                                            {{ txn.get_transaction_type_display }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end font-monospace fw-bold">
+                                        {% if txn.sender_account.user == user %}
+                                            <span class="text-danger">-₹{{ txn.amount|intcomma }}</span>
+                                        {% else %}
+                                            <span class="text-success">+₹{{ txn.amount|intcomma }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="{% url 'transfers:receipt' txn.transaction_id %}" class="btn btn-sm btn-light rounded-circle p-1" title="View Receipt">
+                                            <i class="bi bi-receipt text-primary"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">No transactions recorded yet.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Transfer & Category Spending -->
+        <div class="col-lg-4">
+            <!-- Frequent Beneficiaries -->
+            <div class="card card-prm p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold text-prm-navy mb-0">Quick Pay Beneficiaries</h6>
+                    <a href="{% url 'beneficiaries:list' %}" class="small text-primary text-decoration-none">Manage</a>
+                </div>
+                <div class="d-flex flex-column gap-2">
+                    {% for bene in quick_beneficiaries %}
+                        <div class="d-flex justify-content-between align-items-center p-2 rounded-3 bg-light">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 34px; height: 34px; font-size: 0.8rem;">
+                                    {{ bene.beneficiary_name|first|upper }}
+                                </div>
+                                <div>
+                                    <div class="fw-bold small text-prm-navy">{{ bene.nickname|default:bene.beneficiary_name }}</div>
+                                    <div class="text-muted font-monospace" style="font-size: 0.7rem;">{{ bene.masked_account_number }}</div>
+                                </div>
+                            </div>
+                            <a href="{% url 'transfers:bank_transfer' %}?bene_id={{ bene.id }}" class="btn btn-sm btn-outline-primary rounded-pill px-2 py-1 small">
+                                Send ₹
+                            </a>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-3 text-muted small">
+                            No beneficiaries added yet.<br/>
+                            <a href="{% url 'beneficiaries:add' %}" class="text-primary fw-semibold">+ Add First Beneficiary</a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Spending Breakdown Chart -->
+            <div class="card card-prm p-4">
+                <h6 class="fw-bold text-prm-navy mb-3">Spending by Category</h6>
+                <div style="height: 180px; position: relative;">
+                    <canvas id="categorySpendingChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/dashboard_charts.js' %}"></script>
+{% endblock %}

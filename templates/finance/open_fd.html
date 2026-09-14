@@ -1,0 +1,248 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+
+{% block title %}Open Fixed Deposit — PRIME RESERVE BANK{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid p-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a href="{% url 'finance:deposits' %}" class="btn btn-sm btn-light rounded-pill px-3 mb-2">
+                <i class="bi bi-arrow-left me-1"></i> Back to Deposits
+            </a>
+            <h4 class="fw-bold text-prm-navy mb-1 font-heading">Open Fixed Deposit (FD)</h4>
+            <p class="text-secondary small mb-0">Grow your savings with guaranteed returns and flexible tenures</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card card-prm p-4 p-md-5 bg-white">
+                
+                <form method="post" id="openFdForm">
+                    {% csrf_token %}
+
+                    <!-- 1. Select Debit Account -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-prm-navy">Select Linked Account (Debit Source)</label>
+                        {{ form.linked_account }}
+                    </div>
+
+                    <!-- 2. Deposit Amount -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-prm-navy">Deposit Amount (₹)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light fw-bold text-prm-navy">₹</span>
+                            <input type="number" name="principal_amount" id="fdPrincipalInput" class="form-control form-control-lg fw-bold" placeholder="100000" min="5000" max="10000000" step="5000" value="100000" required>
+                        </div>
+                        <small class="text-muted">Minimum deposit: ₹5,000 | Maximum: ₹1,00,00,000</small>
+                    </div>
+
+                    <!-- 3. Tenure Selection Pills -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-prm-navy mb-2">Select Tenure</label>
+                        <div class="row g-2" id="tenurePillsContainer">
+                            <div class="col-6 col-sm-4 col-md">
+                                <input type="radio" class="btn-check" name="tenure_months" id="tenure6" value="6" autocomplete="off" onchange="updateFdCalculations()">
+                                <label class="btn btn-outline-primary w-100 p-2 rounded-3 text-center" for="tenure6">
+                                    <div class="fw-bold">6 Months</div>
+                                    <small class="text-success fw-semibold">6.50% p.a.</small>
+                                </label>
+                            </div>
+                            <div class="col-6 col-sm-4 col-md">
+                                <input type="radio" class="btn-check" name="tenure_months" id="tenure12" value="12" autocomplete="off" checked onchange="updateFdCalculations()">
+                                <label class="btn btn-outline-primary w-100 p-2 rounded-3 text-center" for="tenure12">
+                                    <div class="fw-bold">12 Months</div>
+                                    <small class="text-success fw-semibold">7.25% p.a.</small>
+                                </label>
+                            </div>
+                            <div class="col-6 col-sm-4 col-md">
+                                <input type="radio" class="btn-check" name="tenure_months" id="tenure24" value="24" autocomplete="off" onchange="updateFdCalculations()">
+                                <label class="btn btn-outline-primary w-100 p-2 rounded-3 text-center" for="tenure24">
+                                    <div class="fw-bold">24 Months</div>
+                                    <small class="text-success fw-semibold">7.50% p.a.</small>
+                                </label>
+                            </div>
+                            <div class="col-6 col-sm-4 col-md">
+                                <input type="radio" class="btn-check" name="tenure_months" id="tenure36" value="36" autocomplete="off" onchange="updateFdCalculations()">
+                                <label class="btn btn-outline-primary w-100 p-2 rounded-3 text-center" for="tenure36">
+                                    <div class="fw-bold">36 Months</div>
+                                    <small class="text-success fw-semibold">7.40% p.a.</small>
+                                </label>
+                            </div>
+                            <div class="col-6 col-sm-4 col-md">
+                                <input type="radio" class="btn-check" name="tenure_months" id="tenure60" value="60" autocomplete="off" onchange="updateFdCalculations()">
+                                <label class="btn btn-outline-primary w-100 p-2 rounded-3 text-center" for="tenure60">
+                                    <div class="fw-bold">60 Months</div>
+                                    <small class="text-success fw-semibold">7.10% p.a.</small>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Dynamic Live Calculation Summary Card -->
+                    <div class="card bg-prm-card-gradient text-white p-4 rounded-4 mb-4 shadow-sm">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="small text-white-50 text-uppercase fw-bold tracking-wider">Deposit Maturity Estimate</span>
+                            <span class="badge bg-warning text-dark fw-bold" id="fdRateBadge">7.25% Interest Rate</span>
+                        </div>
+                        
+                        <div class="row g-3">
+                            <div class="col-6 col-sm-3">
+                                <small class="text-white-50 d-block">You Invest</small>
+                                <span class="fs-5 fw-bold font-heading text-white" id="fdYouInvestDisplay">₹1,00,000</span>
+                            </div>
+                            <div class="col-6 col-sm-3">
+                                <small class="text-white-50 d-block">Interest Earned</small>
+                                <span class="fs-5 fw-bold font-heading text-warning" id="fdInterestEarnedDisplay">+₹7,250</span>
+                            </div>
+                            <div class="col-6 col-sm-3">
+                                <small class="text-white-50 d-block">Maturity Amount</small>
+                                <span class="fs-5 fw-bold font-heading text-success" id="fdMaturityAmountDisplay">₹1,07,250</span>
+                            </div>
+                            <div class="col-6 col-sm-3">
+                                <small class="text-white-50 d-block">Maturity Date</small>
+                                <span class="fs-6 fw-bold text-white font-heading" id="fdMaturityDateDisplay">14 Sep 2027</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" name="auto_renew" id="fd-renew">
+                        <label class="form-check-label small text-secondary" for="fd-renew">
+                            Auto-renew deposit principal upon maturity for the same tenure
+                        </label>
+                    </div>
+
+                    <!-- 5. Actions -->
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <a href="{% url 'finance:deposits' %}" class="btn btn-light rounded-pill px-4">Cancel</a>
+                        <button type="button" class="btn btn-prm-primary btn-lg rounded-pill px-5 shadow" onclick="openFdReviewModal()">
+                            <i class="bi bi-shield-check me-2"></i> Review FD
+                        </button>
+                    </div>
+
+                    <!-- Review & Confirm Modal -->
+                    <div class="modal fade" id="fdReviewModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                                <div class="bg-prm-navy p-4 text-white text-center">
+                                    <h5 class="fw-bold font-heading mb-1 text-white">Review Fixed Deposit</h5>
+                                    <p class="text-white-50 small mb-0">Confirm your deposit terms before final creation</p>
+                                </div>
+                                <div class="modal-body p-4 bg-white">
+                                    <div class="list-group list-group-flush mb-4 small">
+                                        <div class="list-group-item d-flex justify-content-between px-0 py-2">
+                                            <span class="text-muted">Deposit Principal:</span>
+                                            <strong class="text-prm-navy font-monospace" id="modalPrincipal">₹1,00,000</strong>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between px-0 py-2">
+                                            <span class="text-muted">Tenure:</span>
+                                            <strong class="text-prm-navy" id="modalTenure">12 Months</strong>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between px-0 py-2">
+                                            <span class="text-muted">Interest Rate:</span>
+                                            <strong class="text-warning" id="modalRate">7.25% p.a.</strong>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between px-0 py-2">
+                                            <span class="text-muted">Interest Earned:</span>
+                                            <strong class="text-success" id="modalInterest">+₹7,250</strong>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between px-0 py-2">
+                                            <span class="text-muted">Guaranteed Maturity Value:</span>
+                                            <strong class="text-success fs-6" id="modalMaturity">₹1,07,250</strong>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between px-0 py-2">
+                                            <span class="text-muted">Maturity Date:</span>
+                                            <strong class="text-dark" id="modalMatDate">14 Sep 2027</strong>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4 p-3 bg-light rounded-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <label class="form-label small fw-bold text-prm-navy mb-0">Enter Transaction PIN</label>
+                                            <small class="text-muted">Demo PIN: <b>1234</b></small>
+                                        </div>
+                                        <input type="password" name="transaction_pin" id="modalTxnPin" class="form-control text-center font-monospace fs-5 tracking-widest" maxlength="4" placeholder="••••" required>
+                                    </div>
+
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Modify</button>
+                                        <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold">
+                                            <i class="bi bi-check-circle-fill me-1"></i> Confirm & Open FD
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const rates = {
+    6: 6.50,
+    12: 7.25,
+    24: 7.50,
+    36: 7.40,
+    60: 7.10
+};
+
+function updateFdCalculations() {
+    const principal = parseFloat(document.getElementById('fdPrincipalInput').value) || 100000;
+    const tenureRadio = document.querySelector('input[name="tenure_months"]:checked');
+    const tenureMonths = parseInt(tenureRadio ? tenureRadio.value : 12);
+    const rate = rates[tenureMonths] || 7.00;
+
+    // Compound Interest quarterly: A = P * (1 + r/n)^(n*t)
+    const r = rate / 100.0;
+    const t = tenureMonths / 12.0;
+    const n = 4;
+    const maturity = principal * Math.pow((1 + (r / n)), (n * t));
+    const interest = maturity - principal;
+
+    // Calculate Maturity Date
+    const today = new Date();
+    const matDate = new Date();
+    matDate.setMonth(today.getMonth() + tenureMonths);
+    const dateOptions = { day: 'numeric', month: 'short', year: 'numeric' };
+    const dateStr = matDate.toLocaleDateString('en-GB', dateOptions);
+
+    // Update UI elements
+    document.getElementById('fdRateBadge').textContent = rate.toFixed(2) + '% Interest Rate';
+    document.getElementById('fdYouInvestDisplay').textContent = '₹' + Math.round(principal).toLocaleString('en-IN');
+    document.getElementById('fdInterestEarnedDisplay').textContent = '+₹' + Math.round(interest).toLocaleString('en-IN');
+    document.getElementById('fdMaturityAmountDisplay').textContent = '₹' + Math.round(maturity).toLocaleString('en-IN');
+    document.getElementById('fdMaturityDateDisplay').textContent = dateStr;
+
+    // Update modal references
+    document.getElementById('modalPrincipal').textContent = '₹' + Math.round(principal).toLocaleString('en-IN');
+    document.getElementById('modalTenure').textContent = tenureMonths + ' Months';
+    document.getElementById('modalRate').textContent = rate.toFixed(2) + '% p.a.';
+    document.getElementById('modalInterest').textContent = '+₹' + Math.round(interest).toLocaleString('en-IN');
+    document.getElementById('modalMaturity').textContent = '₹' + Math.round(maturity).toLocaleString('en-IN');
+    document.getElementById('modalMatDate').textContent = dateStr;
+}
+
+function openFdReviewModal() {
+    const principal = parseFloat(document.getElementById('fdPrincipalInput').value);
+    if (!principal || principal < 5000) {
+        alert('Please enter a valid deposit amount of at least ₹5,000.');
+        return;
+    }
+    updateFdCalculations();
+    const modal = new bootstrap.Modal(document.getElementById('fdReviewModal'));
+    modal.show();
+}
+
+document.getElementById('fdPrincipalInput').addEventListener('input', updateFdCalculations);
+document.addEventListener('DOMContentLoaded', updateFdCalculations);
+</script>
+{% endblock %}

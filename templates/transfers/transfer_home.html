@@ -1,0 +1,128 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Payments & Transfers — PRIME RESERVE BANK{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid p-0">
+    <div class="mb-4">
+        <h4 class="fw-bold text-prm-navy mb-1 font-heading">Payments & Fund Transfers</h4>
+        <p class="text-secondary small mb-0">Select your preferred transfer channel with atomic double-entry verification</p>
+    </div>
+
+    <!-- Transfer Modes Grid -->
+    <div class="row g-4 mb-5">
+        <!-- Bank Transfer -->
+        <div class="col-md-6 col-xl-3">
+            <a href="{% url 'transfers:bank_transfer' %}" class="card card-prm p-4 text-decoration-none h-100 card-prm-hover">
+                <div class="stat-icon-wrapper bg-primary-subtle text-primary mb-3" style="width: 52px; height: 52px;">
+                    <i class="bi bi-bank fs-4"></i>
+                </div>
+                <h5 class="fw-bold text-prm-navy mb-1">To Bank Account</h5>
+                <p class="text-secondary small mb-3">Transfer to any bank account in India via simulated IMPS / NEFT with IFSC validation.</p>
+                <div class="mt-auto text-primary fw-semibold small">Start Transfer <i class="bi bi-arrow-right"></i></div>
+            </a>
+        </div>
+
+        <!-- Mobile Transfer -->
+        <div class="col-md-6 col-xl-3">
+            <a href="{% url 'transfers:mobile_transfer' %}" class="card card-prm p-4 text-decoration-none h-100 card-prm-hover">
+                <div class="stat-icon-wrapper bg-success-subtle text-success mb-3" style="width: 52px; height: 52px;">
+                    <i class="bi bi-phone fs-4"></i>
+                </div>
+                <h5 class="fw-bold text-prm-navy mb-1">To Mobile Number</h5>
+                <p class="text-secondary small mb-3">Send funds instantly to any Prime Reserve Bank registered mobile number.</p>
+                <div class="mt-auto text-success fw-semibold small">Pay via Mobile <i class="bi bi-arrow-right"></i></div>
+            </a>
+        </div>
+
+        <!-- UPI Transfer -->
+        <div class="col-md-6 col-xl-3">
+            <a href="{% url 'transfers:upi_transfer' %}" class="card card-prm p-4 text-decoration-none h-100 card-prm-hover">
+                <div class="stat-icon-wrapper bg-warning-subtle text-warning mb-3" style="width: 52px; height: 52px;">
+                    <i class="bi bi-qr-code fs-4"></i>
+                </div>
+                <h5 class="fw-bold text-prm-navy mb-1">To UPI ID / VPA</h5>
+                <p class="text-secondary small mb-3">Instant simulated UPI settlement using Virtual Payment Address (e.g. <code>user@primereserve</code>).</p>
+                <div class="mt-auto text-warning fw-semibold small">Pay via UPI <i class="bi bi-arrow-right"></i></div>
+            </a>
+        </div>
+
+        <!-- Self Transfer -->
+        <div class="col-md-6 col-xl-3">
+            <a href="{% url 'transfers:self_transfer' %}" class="card card-prm p-4 text-decoration-none h-100 card-prm-hover">
+                <div class="stat-icon-wrapper bg-info-subtle text-info mb-3" style="width: 52px; height: 52px;">
+                    <i class="bi bi-arrow-repeat fs-4"></i>
+                </div>
+                <h5 class="fw-bold text-prm-navy mb-1">Self Account Transfer</h5>
+                <p class="text-secondary small mb-3">Move funds seamlessly between your own Savings and Current bank accounts.</p>
+                <div class="mt-auto text-info fw-semibold small">Transfer Internally <i class="bi bi-arrow-right"></i></div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Beneficiaries & Recent Transfers Row -->
+    <div class="row g-4">
+        <!-- Beneficiaries Quick Bar -->
+        <div class="col-lg-6">
+            <div class="card card-prm p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold text-prm-navy mb-0">Saved Beneficiaries</h5>
+                    <a href="{% url 'beneficiaries:add' %}" class="btn btn-sm btn-outline-primary rounded-pill">+ Add New</a>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for bene in beneficiaries %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">
+                                    {{ bene.beneficiary_name|first|upper }}
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-prm-navy small">{{ bene.beneficiary_name }}</div>
+                                    <div class="text-muted font-monospace small" style="font-size: 0.72rem;">{{ bene.masked_account_number }} • {{ bene.bank_name }}</div>
+                                </div>
+                            </div>
+                            <a href="{% url 'transfers:bank_transfer' %}?bene_id={{ bene.id }}" class="btn btn-sm btn-prm-primary rounded-pill px-3">
+                                Transfer
+                            </a>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-4 text-muted small">No saved beneficiaries found.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Transfers -->
+        <div class="col-lg-6">
+            <div class="card card-prm p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold text-prm-navy mb-0">Recent Transfers</h5>
+                    <a href="{% url 'transactions:history' %}" class="small text-primary text-decoration-none">Full History</a>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for txn in recent_transfers %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                            <div>
+                                <div class="fw-bold small text-prm-navy">
+                                    {% if txn.sender_account.user == user %}To {{ txn.receiver_name }}{% else %}From {{ txn.sender_name }}{% endif %}
+                                </div>
+                                <div class="text-muted small" style="font-size: 0.72rem;">{{ txn.timestamp|date:"d M Y, h:i A" }} • {{ txn.reference_number }}</div>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold font-monospace {% if txn.sender_account.user == user %}text-danger{% else %}text-success{% endif %}">
+                                    {% if txn.sender_account.user == user %}-₹{{ txn.amount|intcomma }}{% else %}+₹{{ txn.amount|intcomma }}{% endif %}
+                                </div>
+                                <a href="{% url 'transfers:receipt' txn.transaction_id %}" class="small text-muted text-decoration-none">Receipt <i class="bi bi-receipt"></i></a>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-4 text-muted small">No recent transfers.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

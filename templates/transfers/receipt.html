@@ -1,0 +1,101 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Transaction Receipt — {{ txn.reference_number }} — PRIME RESERVE BANK{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid p-0">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <!-- Printable Receipt Card -->
+            <div class="card card-prm p-4 p-md-5 bg-white position-relative" id="printableReceipt">
+                <!-- Watermark Badge -->
+                <div class="text-center mb-4">
+                    <div class="bg-success text-white rounded-circle p-3 d-inline-flex mb-2 shadow-sm" style="width: 64px; height: 64px; align-items: center; justify-content: center;">
+                        <i class="bi bi-check-lg fs-2"></i>
+                    </div>
+                    <h4 class="fw-bold text-prm-navy font-heading mb-1">Transaction Successful</h4>
+                    <p class="text-muted small mb-0">PRMB Instant Payment Confirmation</p>
+                </div>
+
+                <!-- Amount Box -->
+                <div class="p-3 bg-light rounded-4 text-center my-3 border">
+                    <div class="small text-secondary mb-1">Amount Transferred</div>
+                    <div class="display-5 fw-bold text-prm-navy font-heading">₹{{ txn.amount|intcomma }}</div>
+                    <div class="badge bg-success-subtle text-success px-3 py-1 mt-2">
+                        <i class="bi bi-patch-check-fill me-1"></i> {{ txn.get_status_display }}
+                    </div>
+                </div>
+
+                <!-- Transaction Details Table -->
+                <div class="table-responsive my-4">
+                    <table class="table table-borderless small mb-0">
+                        <tbody>
+                            <tr class="border-bottom">
+                                <td class="text-secondary py-2">Transaction ID</td>
+                                <td class="text-end fw-bold font-monospace text-prm-navy py-2">{{ txn.transaction_id }}</td>
+                            </tr>
+                            <tr class="border-bottom">
+                                <td class="text-secondary py-2">Bank Reference Number</td>
+                                <td class="text-end fw-bold font-monospace text-primary py-2">{{ txn.reference_number }}</td>
+                            </tr>
+                            <tr class="border-bottom">
+                                <td class="text-secondary py-2">Transfer Channel</td>
+                                <td class="text-end fw-semibold py-2">{{ txn.get_transaction_type_display }}</td>
+                            </tr>
+                            <tr class="border-bottom">
+                                <td class="text-secondary py-2">Sender Account Holder</td>
+                                <td class="text-end fw-semibold py-2">{{ txn.sender_name }}</td>
+                            </tr>
+                            {% if txn.sender_account %}
+                                <tr class="border-bottom">
+                                    <td class="text-secondary py-2">From Account</td>
+                                    <td class="text-end font-monospace py-2">{{ txn.sender_account.masked_account_number }}</td>
+                                </tr>
+                            {% endif %}
+                            <tr class="border-bottom">
+                                <td class="text-secondary py-2">Beneficiary / Recipient</td>
+                                <td class="text-end fw-semibold py-2">{{ txn.receiver_name }}</td>
+                            </tr>
+                            <tr class="border-bottom">
+                                <td class="text-secondary py-2">Remarks / Purpose</td>
+                                <td class="text-end py-2">{{ txn.remarks|default:"Fund Transfer" }}</td>
+                            </tr>
+                            <tr class="border-bottom">
+                                <td class="text-secondary py-2">Transaction Date & Time</td>
+                                <td class="text-end py-2">{{ txn.timestamp|date:"d F Y, h:i:s A" }}</td>
+                            </tr>
+                            {% if is_sender and txn.sender_balance_after %}
+                                <tr>
+                                    <td class="text-secondary py-2">Available Balance After Debit</td>
+                                    <td class="text-end fw-bold font-monospace text-prm-navy py-2">₹{{ txn.sender_balance_after|intcomma }}</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="text-center p-3 bg-light rounded-3 small text-muted mb-4 border">
+                    <i class="bi bi-info-circle me-1"></i> This is a simulated transaction record generated by PRIME RESERVE BANK educational digital banking platform.
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex flex-wrap justify-content-between gap-2">
+                    <a href="{% url 'dashboard:home' %}" class="btn btn-light rounded-pill px-4">
+                        <i class="bi bi-grid me-1"></i> Dashboard
+                    </a>
+                    <div class="d-flex gap-2">
+                        <button onclick="window.print()" class="btn btn-outline-secondary rounded-pill px-3">
+                            <i class="bi bi-printer me-1"></i> Print Slip
+                        </button>
+                        <a href="{% url 'transfers:bank_transfer' %}" class="btn btn-prm-primary rounded-pill px-4 shadow-sm">
+                            <i class="bi bi-plus-lg me-1"></i> New Transfer
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

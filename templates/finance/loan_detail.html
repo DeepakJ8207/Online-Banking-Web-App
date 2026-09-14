@@ -1,0 +1,123 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Loan Account — {{ loan.loan_account_number }} — PRIME RESERVE BANK{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid p-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a href="{% url 'finance:loans' %}" class="btn btn-sm btn-light rounded-pill px-3 mb-2">
+                <i class="bi bi-arrow-left me-1"></i> Back to Loans
+            </a>
+            <h4 class="fw-bold text-prm-navy mb-1 font-heading">{{ loan.loan_product.name }}</h4>
+            <div class="text-secondary small font-monospace">Loan A/c: {{ loan.loan_account_number }}</div>
+        </div>
+        <span class="badge {% if loan.status == 'ACTIVE' %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-dark{% endif %} fs-6 px-3 py-2">
+            {{ loan.get_status_display }}
+        </span>
+    </div>
+
+    <!-- Loan Overview Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-4">
+            <div class="card card-prm p-4 h-100 bg-white">
+                <h6 class="text-secondary small fw-bold text-uppercase mb-2">Outstanding Principal & Interest</h6>
+                <div class="display-6 fw-bold text-danger font-heading mb-2">₹{{ loan.outstanding_balance|intcomma }}</div>
+                <div class="small text-muted">Original Sanction: ₹{{ loan.principal_amount|intcomma }}</div>
+                <div class="small text-muted">Total Paid to Date: <span class="text-success fw-bold">₹{{ loan.total_paid|intcomma }}</span></div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card card-prm p-4 h-100 bg-white">
+                <h6 class="text-secondary small fw-bold text-uppercase mb-2">Monthly EMI Obligation</h6>
+                <div class="display-6 fw-bold text-prm-navy font-heading mb-2">₹{{ loan.monthly_emi|intcomma }}</div>
+                <div class="small text-muted">Interest Rate: <b>{{ loan.interest_rate }}% p.a.</b></div>
+                <div class="small text-muted">Tenure: <b>{{ loan.tenure_months }} Months</b></div>
+            </div>
+        </div>
+
+        <!-- Next EMI Quick Payment Card -->
+        <div class="col-lg-4">
+            <div class="card card-prm p-4 h-100 bg-prm-navy text-white d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-warning text-dark fw-bold">Next EMI Due</span>
+                        {% if next_due %}
+                            <span class="small text-white-50">Due: {{ next_due.due_date|date:"d M Y" }}</span>
+                        {% endif %}
+                    </div>
+                    {% if next_due %}
+                        <div class="display-6 fw-bold font-heading mb-1 text-white">₹{{ next_due.emi_amount|intcomma }}</div>
+                        <div class="small text-white-50 mb-3">Installment #{{ next_due.installment_number }} of {{ loan.tenure_months }}</div>
+                    {% else %}
+                        <div class="text-success fw-bold my-3 fs-5">All installments fully paid!</div>
+                    {% endif %}
+                </div>
+
+                {% if next_due and loan.status == 'ACTIVE' %}
+                    <form method="post" action="{% url 'finance:loan_pay_emi' loan.id %}">
+                        {% csrf_token %}
+                        <div class="mb-2">
+                            <label class="form-label text-white-50 small mb-1">Pay From Bank Account</label>
+                            {{ pay_form.source_account }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-white-50 small mb-1">PIN (Demo: 1234)</label>
+                            {{ pay_form.transaction_pin }}
+                        </div>
+                        <button type="submit" class="btn btn-warning text-dark fw-bold rounded-pill w-100 py-2 shadow-sm">
+                            <i class="bi bi-credit-card-2-front me-1"></i> Pay This EMI
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Repayment Schedule Table -->
+    <div class="card card-prm p-4 bg-white">
+        <h5 class="fw-bold text-prm-navy mb-3">Loan Repayment Schedule (Amortization)</h5>
+        <div class="table-responsive" style="max-height: 420px; overflow-y: auto;">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small text-secondary sticky-top">
+                    <tr>
+                        <th># Installment</th>
+                        <th>Due Date</th>
+                        <th class="text-end">EMI (₹)</th>
+                        <th class="text-end">Principal</th>
+                        <th class="text-end">Interest</th>
+                        <th class="text-center">Status</th>
+                        <th>Paid Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rep in repayments %}
+                        <tr class="{% if rep.status == 'PAID' %}table-light{% endif %}">
+                            <td class="fw-bold font-monospace">#{{ rep.installment_number }}</td>
+                            <td class="small">{{ rep.due_date|date:"d M Y" }}</td>
+                            <td class="text-end font-monospace fw-bold">₹{{ rep.emi_amount|intcomma }}</td>
+                            <td class="text-end font-monospace text-muted small">₹{{ rep.principal_component|intcomma }}</td>
+                            <td class="text-end font-monospace text-muted small">₹{{ rep.interest_component|intcomma }}</td>
+                            <td class="text-center">
+                                {% if rep.status == 'PAID' %}
+                                    <span class="badge bg-success-subtle text-success"><i class="bi bi-check-circle me-1"></i> Paid</span>
+                                {% else %}
+                                    <span class="badge bg-warning-subtle text-warning"><i class="bi bi-clock me-1"></i> Due</span>
+                                {% endif %}
+                            </td>
+                            <td class="small text-muted">{{ rep.paid_date|date:"d M Y"|default:"-" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">No schedule records available.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

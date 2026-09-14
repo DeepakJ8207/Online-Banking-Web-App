@@ -1,0 +1,59 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+
+{% block title %}Self Account Transfer — PRIME RESERVE BANK{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid p-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a href="{% url 'transfers:home' %}" class="btn btn-sm btn-light rounded-pill px-3 mb-2">
+                <i class="bi bi-arrow-left me-1"></i> Back to Transfers
+            </a>
+            <h4 class="fw-bold text-prm-navy mb-1 font-heading">Self Account Transfer</h4>
+            <p class="text-secondary small mb-0">Move money instantly between your Prime Reserve Savings and Current accounts</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card card-prm p-4 p-md-5 bg-white">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-prm-navy">From Account (Debit)</label>
+                        {{ form.from_account }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-prm-navy">To Account (Credit)</label>
+                        {{ form.to_account }}
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-prm-navy">Amount (₹)</label>
+                            {{ form.amount }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Remarks</label>
+                            {{ form.remarks }}
+                        </div>
+                    </div>
+                    <div class="mb-4 p-3 bg-light rounded-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label small fw-bold text-prm-navy mb-0">Transaction PIN</label>
+                            <small class="text-muted">Demo PIN: <b>1234</b></small>
+                        </div>
+                        {{ form.transaction_pin }}
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'transfers:home' %}" class="btn btn-light rounded-pill px-4">Cancel</a>
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 shadow">
+                            <i class="bi bi-arrow-repeat me-1"></i> Transfer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

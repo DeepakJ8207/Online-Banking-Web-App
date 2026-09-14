@@ -1,0 +1,169 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Account Details — {{ account.account_number }} — PRIME RESERVE BANK{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid p-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a href="{% url 'banking:my_account' %}" class="btn btn-sm btn-light rounded-pill px-3 mb-2">
+                <i class="bi bi-arrow-left me-1"></i> Back to Accounts
+            </a>
+            <h4 class="fw-bold text-prm-navy mb-1 font-heading">
+                {{ account.get_account_type_display }}
+            </h4>
+            <div class="text-secondary small font-monospace">Account No: {{ account.account_number }}</div>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'transactions:download_statement' %}?account_id={{ account.id }}" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                <i class="bi bi-file-earmark-pdf-fill me-1"></i> Download Statement
+            </a>
+            <a href="{% url 'banking:change_pin' account.id %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                <i class="bi bi-key me-1"></i> Change PIN
+            </a>
+        </div>
+    </div>
+
+    <!-- Account Details Table Card -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-7">
+            <div class="card card-prm p-4 h-100 bg-white">
+                <h5 class="fw-bold text-prm-navy mb-3">Account Specification</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                        <tbody>
+                            <tr>
+                                <th class="bg-light text-secondary small w-40">Account Holder</th>
+                                <td class="fw-bold text-prm-navy">{{ account.user.get_full_name|default:account.user.username }}</td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light text-secondary small">Customer ID / CIF</th>
+                                <td class="font-monospace">{{ account.user.profile.cif_number|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light text-secondary small">Full Account Number</th>
+                                <td class="font-monospace fw-bold text-primary">{{ account.account_number }}</td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light text-secondary small">Branch & IFSC</th>
+                                <td>{{ account.branch.branch_name }} (<span class="font-monospace text-success fw-bold">{{ account.branch.ifsc_code }}</span>)</td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light text-secondary small">Account Opening Date</th>
+                                <td>{{ account.opening_date|date:"d F Y" }}</td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light text-secondary small">Daily Transfer Limit</th>
+                                <td class="font-monospace">₹{{ account.daily_transfer_limit|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light text-secondary small">Nominee Details</th>
+                                <td>{{ account.nominee_name|default:"None Assigned" }} ({{ account.nominee_relation|default:"N/A" }})</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card card-prm p-4 h-100 bg-prm-card-gradient text-white d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge bg-warning text-dark fw-bold">{{ account.get_account_type_display }}</span>
+                        <i class="bi bi-shield-lock-fill text-success fs-4"></i>
+                    </div>
+                    <div class="text-white-50 small mb-1">Available Balance</div>
+                    <div class="display-5 fw-bold mb-3 font-heading text-white">₹{{ account.balance|intcomma }}</div>
+                </div>
+
+                <div class="border-top border-white-50 pt-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2 small text-white-50">
+                        <span>Daily Limit Remaining:</span>
+                        <span class="text-white fw-bold font-monospace">₹{{ account.daily_transfer_limit|intcomma }}</span>
+                    </div>
+                    <div class="d-flex gap-2 mt-3">
+                        <a href="{% url 'transfers:bank_transfer' %}" class="btn btn-warning text-dark fw-bold rounded-pill w-100">
+                            Transfer Money
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions for this Account -->
+    <div class="card card-prm p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold text-prm-navy mb-0">Recent Account Activity</h5>
+            <a href="{% url 'transactions:history' %}?account={{ account.id }}" class="btn btn-sm btn-outline-primary rounded-pill">View All in Ledger</a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small text-secondary">
+                    <tr>
+                        <th>Date</th>
+                        <th>Reference</th>
+                        <th>Description</th>
+                        <th class="text-end">Debit</th>
+                        <th class="text-end">Credit</th>
+                        <th class="text-end">Balance After</th>
+                        <th class="text-center">Receipt</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for txn in recent_transactions %}
+                        <tr>
+                            <td class="small">{{ txn.timestamp|date:"d M Y, h:i A" }}</td>
+                            <td class="small font-monospace text-muted">{{ txn.reference_number }}</td>
+                            <td class="small">
+                                {% if txn.sender_account_id == account.id %}
+                                    <span class="text-danger fw-semibold">To:</span> {{ txn.receiver_name }}
+                                {% else %}
+                                    <span class="text-success fw-semibold">From:</span> {{ txn.sender_name }}
+                                {% endif %}
+                                <div class="text-muted" style="font-size: 0.72rem;">{{ txn.remarks }}</div>
+                            </td>
+                            <td class="text-end font-monospace">
+                                {% if txn.sender_account_id == account.id %}
+                                    <span class="text-danger fw-bold">-₹{{ txn.amount|intcomma }}</span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td class="text-end font-monospace">
+                                {% if txn.receiver_account_id == account.id %}
+                                    <span class="text-success fw-bold">+₹{{ txn.amount|intcomma }}</span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td class="text-end font-monospace small">
+                                {% if txn.sender_account_id == account.id and txn.sender_balance_after %}
+                                    ₹{{ txn.sender_balance_after|intcomma }}
+                                {% elif txn.receiver_account_id == account.id and txn.receiver_balance_after %}
+                                    ₹{{ txn.receiver_balance_after|intcomma }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <a href="{% url 'transfers:receipt' txn.transaction_id %}" class="btn btn-sm btn-light rounded-circle p-1">
+                                    <i class="bi bi-receipt text-primary"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">No transactions found for this account.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

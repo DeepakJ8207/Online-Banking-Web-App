@@ -1,0 +1,112 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Term Deposits (FD & RD) — PRIME RESERVE BANK{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid p-0">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h4 class="fw-bold text-prm-navy mb-1 font-heading">Term Deposits Portfolio</h4>
+            <p class="text-secondary small mb-0">High-yield Fixed Deposits and disciplined Recurring Deposits with automatic interest compounding</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'finance:open_fd' %}" class="btn btn-success rounded-pill px-3 shadow-sm">
+                <i class="bi bi-piggy-bank me-1"></i> Open New FD
+            </a>
+            <a href="{% url 'finance:open_rd' %}" class="btn btn-warning text-dark fw-bold rounded-pill px-3 shadow-sm">
+                <i class="bi bi-calendar-plus me-1"></i> Open New RD
+            </a>
+        </div>
+    </div>
+
+    <!-- Fixed Deposits List -->
+    <h5 class="fw-bold text-prm-navy mb-3"><i class="bi bi-piggy-bank text-success me-2"></i> Fixed Deposits (FD)</h5>
+    <div class="row g-4 mb-5">
+        {% for fd in fds %}
+            <div class="col-lg-6">
+                <div class="card card-prm p-4 bg-white">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <span class="badge bg-success-subtle text-success font-monospace mb-1">{{ fd.fd_number }}</span>
+                            <h5 class="fw-bold text-prm-navy mb-0">Fixed Deposit Account</h5>
+                        </div>
+                        <span class="badge bg-success">{{ fd.interest_rate }}% p.a.</span>
+                    </div>
+
+                    <div class="my-3 p-3 bg-light rounded-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="small text-secondary">Invested Principal:</span>
+                            <span class="fw-bold text-prm-navy font-monospace">₹{{ fd.principal_amount|intcomma }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="small text-secondary">Interest Earned at Maturity:</span>
+                            <span class="fw-bold text-success font-monospace">+₹{{ fd.interest_earned|intcomma }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between pt-2 border-top">
+                            <span class="fw-bold text-prm-navy">Maturity Value:</span>
+                            <span class="fw-bold text-success font-monospace fs-5">₹{{ fd.maturity_amount|intcomma }}</span>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 small text-secondary">
+                        <div class="col-6">Tenure: <strong>{{ fd.tenure_months }} Months</strong></div>
+                        <div class="col-6">Maturity Date: <strong>{{ fd.maturity_date|date:"d M Y" }}</strong></div>
+                        <div class="col-6">Linked Account: <strong>{{ fd.linked_account.masked_account_number }}</strong></div>
+                        <div class="col-6">Auto Renewal: <strong>{% if fd.auto_renew %}Enabled{% else %}Disabled{% endif %}</strong></div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-4 text-muted small card card-prm bg-white">
+                No active Fixed Deposits. <a href="{% url 'finance:open_fd' %}" class="text-success fw-bold">Open your first FD</a>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Recurring Deposits List -->
+    <h5 class="fw-bold text-prm-navy mb-3"><i class="bi bi-calendar2-week text-warning me-2"></i> Recurring Deposits (RD)</h5>
+    <div class="row g-4">
+        {% for rd in rds %}
+            <div class="col-lg-6">
+                <div class="card card-prm p-4 bg-white">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <span class="badge bg-warning-subtle text-warning font-monospace mb-1">{{ rd.rd_number }}</span>
+                            <h5 class="fw-bold text-prm-navy mb-0">Recurring Deposit Account</h5>
+                        </div>
+                        <span class="badge bg-warning text-dark">{{ rd.interest_rate }}% p.a.</span>
+                    </div>
+
+                    <div class="my-3 p-3 bg-light rounded-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="small text-secondary">Monthly Installment:</span>
+                            <span class="fw-bold text-prm-navy font-monospace">₹{{ rd.monthly_deposit|intcomma }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="small text-secondary">Total Deposit:</span>
+                            <span class="fw-bold text-prm-navy font-monospace">₹{{ rd.total_deposit|intcomma }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between pt-2 border-top">
+                            <span class="fw-bold text-prm-navy">Maturity Corpus:</span>
+                            <span class="fw-bold text-warning font-monospace fs-5">₹{{ rd.maturity_amount|intcomma }}</span>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 small text-secondary">
+                        <div class="col-6">Tenure: <strong>{{ rd.tenure_months }} Months</strong></div>
+                        <div class="col-6">Maturity Date: <strong>{{ rd.maturity_date|date:"d M Y" }}</strong></div>
+                        <div class="col-6">Linked Account: <strong>{{ rd.linked_account.masked_account_number }}</strong></div>
+                        <div class="col-6">Status: <strong class="text-success">{{ rd.get_status_display }}</strong></div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-4 text-muted small card card-prm bg-white">
+                No active Recurring Deposits. <a href="{% url 'finance:open_rd' %}" class="text-warning fw-bold">Open your first RD</a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
