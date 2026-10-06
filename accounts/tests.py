@@ -110,3 +110,80 @@ class WebViewsIntegrationTestCase(TestCase):
         self.assertEqual(self.client.get(reverse('accounts:change_password')).status_code, 200)
         self.assertEqual(self.client.get(reverse('accounts:notifications')).status_code, 200)
         self.assertEqual(self.client.get(reverse('accounts:audit_logs')).status_code, 200)
+
+    def test_admin_registration_and_customer_first_login_flow(self):
+        admin = User.objects.create_superuser('superadmin', 'admin@bank.demo', 'Admin@12345')
+        self.client.force_login(admin)
+
+        # 1. Admin registers new customer
+        res = self.client.post(reverse('admin_dashboard:create_customer'), {
+            'first_name': 'Karan',
+            'last_name': 'Mehta',
+            'username': 'karan_mehta',
+            'email': 'karan.mehta@example.com',
+            'phone_number': '9811223344',
+            'branch': self.branch.id,
+            'account_type': 'SAVINGS',
+            'initial_deposit': '20000.00',
+            'initial_password': 'InitPassword@123'
+        }, follow=True)
+        self.assertEqual(res.status_code, 200)
+
+        karan = User.objects.get(username='karan_mehta')
+        self.assertTrue(karan.profile.is_first_login)
+        self.assertFalse(karan.profile.has_set_upi_pin)
+
+        # 2. Customer login step 1 (Password)
+        c_client = Client()
+        res_l1 = c_client.post(reverse('accounts:login'), {
+            'username': 'karan_mehta',
+            'password': 'InitPassword@123'
+        }, follow=True)
+        self.assertEqual(res_l1.status_code, 200)
+        otp = c_client.session.get('demo_login_otp')
+        self.assertIsNotNone(otp)
+
+        # 3. Customer login step 2 (Email OTP) -> Redirect to First-Time Setup
+        res_otp = c_client.post(reverse('accounts:login_otp'), {'otp_code': otp}, follow=True)
+        self.assertEqual(res_otp.status_code, 200)
+        self.assertEqual(res_otp.redirect_chain[-1][0], '/first-time-setup/')
+
+        # 4. First-time Setup: Set UPI PIN
+        res_setup = c_client.post(reverse('accounts:first_time_setup'), {
+            'upi_pin': '9988',
+            'confirm_upi_pin': '9988',
+            'new_password': '',
+            'confirm_new_password': ''
+        }, follow=True)
+        self.assertEqual(res_setup.status_code, 200)
+        self.assertEqual(res_setup.redirect_chain[-1][0], '/dashboard/')
+
+        karan.profile.refresh_from_db()
+        self.assertFalse(karan.profile.is_first_login)
+        self.assertTrue(karan.profile.has_set_upi_pin)
+        self.assertTrue(karan.bank_accounts.first().check_transaction_pin('9988'))
+
+    def test_forgot_password_email_otp_flow(self):
+        c_client = Client()
+
+        # Step 1: Identifier
+        res1 = c_client.post(reverse('accounts:forgot_password'), {'identifier': 'testuser'}, follow=True)
+        self.assertEqual(res1.status_code, 200)
+        otp = c_client.session.get('demo_forgot_otp')
+        self.assertIsNotNone(otp)
+
+        # Step 2: Enter Email OTP
+        res2 = c_client.post(reverse('accounts:forgot_password'), {'otp_code': otp}, follow=True)
+        self.assertEqual(res2.status_code, 200)
+        self.assertEqual(c_client.session.get('forgot_step'), 3)
+
+        # Step 3: Set New Password
+        res3 = c_client.post(reverse('accounts:forgot_password'), {
+            'new_password': 'UpdatedPass@123',
+            'confirm_new_password': 'UpdatedPass@123'
+        }, follow=True)
+        self.assertEqual(res3.status_code, 200)
+
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password('UpdatedPass@123'))
+

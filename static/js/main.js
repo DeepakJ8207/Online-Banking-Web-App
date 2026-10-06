@@ -2,31 +2,45 @@
  * PRIME RESERVE BANK - Core JavaScript Helpers & Loading States
  */
 
-document.addEventListener('DOMContentLoaded', function() {
-    // 1. Password Visibility Toggle
-    const togglePasswordButtons = document.querySelectorAll('.toggle-password-btn');
-    togglePasswordButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const targetId = this.getAttribute('data-target');
-            const inputField = document.getElementById(targetId) || this.previousElementSibling;
-            if (inputField) {
-                const icon = this.querySelector('i');
-                if (inputField.type === 'password') {
-                    inputField.type = 'text';
-                    if (icon) {
-                        icon.classList.remove('bi-eye');
-                        icon.classList.add('bi-eye-slash');
-                    }
-                } else {
-                    inputField.type = 'password';
-                    if (icon) {
-                        icon.classList.remove('bi-eye-slash');
-                        icon.classList.add('bi-eye');
-                    }
-                }
+// 1. Robust Password Visibility Toggle Helper
+window.togglePasswordVisibility = function(targetId, btnEl) {
+    let inputField = null;
+    if (targetId) {
+        inputField = document.getElementById(targetId);
+    }
+    if (!inputField && btnEl) {
+        inputField = btnEl.closest('.input-group')?.querySelector('input') || btnEl.previousElementSibling;
+    }
+    if (inputField) {
+        const icon = btnEl ? (btnEl.querySelector('i') || btnEl) : null;
+        if (inputField.type === 'password') {
+            inputField.type = 'text';
+            if (icon) {
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
             }
-        });
-    });
+        } else {
+            inputField.type = 'password';
+            if (icon) {
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        }
+    }
+};
+
+// Global click event delegation for any toggle-password-btn
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.toggle-password-btn');
+    if (btn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const targetId = btn.getAttribute('data-target');
+        window.togglePasswordVisibility(targetId, btn);
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
 
     // 2. Copy To Clipboard Helper
     window.copyToClipboard = function(text, label = 'Copied to clipboard!') {

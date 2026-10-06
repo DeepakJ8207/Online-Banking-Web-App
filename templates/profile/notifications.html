@@ -1,0 +1,58 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+
+{% block title %}Notifications & Alerts — PRIME RESERVE BANK{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid p-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold text-prm-navy mb-1 font-heading">Notifications & Security Alerts</h4>
+            <p class="text-secondary small mb-0">System communications, OTP logs, and transaction status alerts</p>
+        </div>
+        <div>
+            <a href="{% url 'accounts:notifications' %}?mark_all_read=true" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                <i class="bi bi-check2-all me-1"></i> Mark All as Read
+            </a>
+        </div>
+    </div>
+
+    <div class="card card-prm p-4 bg-white shadow-sm rounded-4 border-0">
+        <div class="list-group list-group-flush">
+            {% for notif in page_obj %}
+                <div class="list-group-item px-0 py-3 d-flex align-items-start gap-3 border-bottom {% if not notif.is_read %}bg-light bg-opacity-50{% endif %}">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center p-2 mt-1 {% if notif.notification_type == 'SECURITY' or notif.notification_type == 'ERROR' %}bg-danger-subtle text-danger{% elif notif.notification_type == 'SUCCESS' %}bg-success-subtle text-success{% else %}bg-primary-subtle text-primary{% endif %}" style="width: 40px; height: 40px; flex-shrink: 0;">
+                        <i class="bi {% if notif.notification_type == 'SECURITY' %}bi-shield-lock{% elif notif.notification_type == 'SUCCESS' %}bi-check-circle{% else %}bi-bell{% endif %} fs-5"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h6 class="fw-bold text-dark mb-0">{{ notif.title }}</h6>
+                            <small class="text-muted">{{ notif.created_at|date:"d M Y, h:i A" }}</small>
+                        </div>
+                        <p class="text-secondary small mb-0">{{ notif.message }}</p>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-bell-slash fs-1 d-block mb-2 text-secondary"></i>
+                    <p class="mb-0">You have no notifications yet.</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if page_obj.has_other_pages %}
+        <div class="d-flex justify-content-center pt-4">
+            <ul class="pagination pagination-sm mb-0">
+                {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                {% endif %}
+                <li class="page-item active"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+                {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                {% endif %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

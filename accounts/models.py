@@ -47,6 +47,8 @@ class CustomerProfile(models.Model):
     profile_photo = models.ImageField(upload_to='profile_photos/', default='profile_photos/default_avatar.png', blank=True)
     kyc_status = models.CharField(max_length=20, choices=KYC_STATUS_CHOICES, default='VERIFIED')
     is_internet_banking_active = models.BooleanField(default=True)
+    is_first_login = models.BooleanField(default=True, help_text="True if customer has not completed initial setup")
+    has_set_upi_pin = models.BooleanField(default=False, help_text="True once customer generates their UPI PIN")
     failed_login_count = models.PositiveIntegerField(default=0)
     is_locked = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -62,6 +64,17 @@ class CustomerProfile(models.Model):
         if len(self.phone_number) >= 10:
             return f"+91 {self.phone_number[:2]}******{self.phone_number[-2:]}"
         return self.phone_number
+
+    def masked_email(self):
+        email = self.user.email or ''
+        if email and '@' in email:
+            name, domain = email.split('@', 1)
+            if len(name) > 2:
+                masked_name = name[0] + '*' * (len(name) - 2) + name[-1]
+            else:
+                masked_name = name[0] + '*'
+            return f"{masked_name}@{domain}"
+        return email
 
 
 class OTPVerification(models.Model):

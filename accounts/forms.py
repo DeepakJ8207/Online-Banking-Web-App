@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
+from decimal import Decimal
 from .models import CustomerProfile, Branch, OTPVerification
 from banking.models import BankAccount
 import re
@@ -28,94 +29,146 @@ class UserLoginForm(forms.Form):
     )
 
 
-class RegistrationStep1Form(forms.Form):
-    account_number = forms.CharField(
-        max_length=16,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control form-control-lg',
-            'placeholder': 'e.g. 10010020030045',
-            'id': 'reg-account-number'
-        }),
-        help_text="14-16 digit account number issued by Prime Reserve Bank"
-    )
-    cif_number = forms.CharField(
-        max_length=15,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control form-control-lg',
-            'placeholder': 'e.g. 98765432101',
-            'id': 'reg-cif-number'
-        }),
-        help_text="11 digit Customer Identification File (CIF) number"
-    )
-
-
-class RegistrationStep2Form(forms.Form):
-    registered_mobile = forms.CharField(
-        max_length=15,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control form-control-lg',
-            'placeholder': '10-digit mobile number',
-            'id': 'reg-mobile'
-        }),
-        help_text="Enter mobile number registered with this bank account"
-    )
-
-
-class RegistrationStep3Form(forms.Form):
+class LoginOTPForm(forms.Form):
     otp_code = forms.CharField(
         max_length=6,
         widget=forms.TextInput(attrs={
-            'class': 'form-control form-control-lg text-center tracking-widest letter-spacing-lg font-monospace',
+            'class': 'form-control form-control-lg text-center tracking-widest letter-spacing-lg font-monospace fs-4 py-2',
             'placeholder': '••••••',
-            'id': 'reg-otp',
-            'maxlength': '6'
+            'id': 'login-otp',
+            'maxlength': '6',
+            'autofocus': 'autofocus'
         }),
-        help_text="Enter 6-digit OTP received via SMS / Demo Banner"
+        help_text="Enter the 6-digit verification code sent to your registered email address"
     )
 
 
-class RegistrationStep4Form(forms.Form):
+class FirstTimeSetupForm(forms.Form):
+    upi_pin = forms.CharField(
+        max_length=6,
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control form-control-lg text-center tracking-widest font-monospace fs-4',
+            'placeholder': '••••',
+            'maxlength': '4',
+            'id': 'upi-pin'
+        }),
+        help_text="Create a 4-digit security PIN for UPI transfers & ATM authorization"
+    )
+    confirm_upi_pin = forms.CharField(
+        max_length=6,
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control form-control-lg text-center tracking-widest font-monospace fs-4',
+            'placeholder': '••••',
+            'maxlength': '4',
+            'id': 'confirm-upi-pin'
+        }),
+        help_text="Re-enter your 4-digit PIN"
+    )
+    new_password = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control form-control-lg',
+            'placeholder': 'New Password (optional)',
+            'id': 'setup-new-pwd'
+        }),
+        help_text="Optional: Update your temporary password to a personalized password"
+    )
+    confirm_new_password = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control form-control-lg',
+            'placeholder': 'Confirm New Password',
+            'id': 'setup-confirm-pwd'
+        })
+    )
+
+    def clean(self):
+        cleaned = super().clean()
+        p1 = cleaned.get('upi_pin', '').strip()
+        p2 = cleaned.get('confirm_upi_pin', '').strip()
+        if p1 != p2:
+            raise forms.ValidationError("UPI PINs do not match. Please re-enter carefully.")
+        if not p1.isdigit() or len(p1) not in (4, 6):
+            raise forms.ValidationError("UPI PIN must be 4 numeric digits (e.g. 1234).")
+
+        new_pwd = cleaned.get('new_password')
+        confirm_pwd = cleaned.get('confirm_new_password')
+        if new_pwd:
+            if new_pwd != confirm_pwd:
+                raise forms.ValidationError("New passwords do not match.")
+            if len(new_pwd) < 8:
+                raise forms.ValidationError("New password must be at least 8 characters long.")
+        return cleaned
+
+
+class AdminCustomerRegistrationForm(forms.Form):
+    """
+    Used by Bank Manager / Admin to register a new customer in branch
+    and dispatch official account credentials to the customer's email.
+    """
+    first_name = forms.CharField(
+        max_length=50,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Aarav', 'id': 'adm-first-name'})
+    )
+    last_name = forms.CharField(
+        max_length=50,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Sharma', 'id': 'adm-last-name'})
+    )
     username = forms.CharField(
-        max_length=150,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control form-control-lg',
-            'placeholder': 'Choose unique username (e.g. priya_prmb)',
-            'id': 'reg-username'
-        })
+        max_length=50,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. aarav_sharma', 'id': 'adm-username'})
     )
-    password = forms.CharField(
-        widget=forms.PasswordInput(attrs={
-            'class': 'form-control form-control-lg',
-            'placeholder': 'Create strong password',
-            'id': 'reg-password'
-        }),
-        help_text="At least 8 characters with letters, numbers & special character"
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'customer@example.com', 'id': 'adm-email'}),
+        help_text="Account credentials & login OTP will be sent to this email address"
     )
-    confirm_password = forms.CharField(
-        widget=forms.PasswordInput(attrs={
-            'class': 'form-control form-control-lg',
-            'placeholder': 'Confirm your password',
-            'id': 'reg-confirm-password'
-        })
+    phone_number = forms.CharField(
+        max_length=15,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 9876543210', 'id': 'adm-phone'})
+    )
+    branch = forms.ModelChoiceField(
+        queryset=Branch.objects.all(),
+        empty_label="Select Branch",
+        widget=forms.Select(attrs={'class': 'form-select', 'id': 'adm-branch'})
+    )
+    account_type = forms.ChoiceField(
+        choices=[
+            ('SAVINGS', 'Prime Savings Account'),
+            ('CURRENT', 'Prime Current Account'),
+            ('SALARY', 'Prime Corporate Salary Account')
+        ],
+        widget=forms.Select(attrs={'class': 'form-select', 'id': 'adm-account-type'})
+    )
+    initial_deposit = forms.DecimalField(
+        min_value=Decimal('500.00'),
+        initial=Decimal('25000.00'),
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '₹ Initial Deposit Amount', 'id': 'adm-deposit'})
+    )
+    initial_password = forms.CharField(
+        initial="Prime@12345",
+        widget=forms.TextInput(attrs={'class': 'form-control font-monospace', 'placeholder': 'Initial Temporary Password', 'id': 'adm-password'}),
+        help_text="Temporary password dispatched to customer email"
     )
 
     def clean_username(self):
-        username = self.cleaned_data.get('username')
+        username = self.cleaned_data.get('username', '').strip()
         if User.objects.filter(username__iexact=username).exists():
             raise forms.ValidationError("This username is already taken. Please choose another.")
         if not re.match(r'^[a-zA-Z0-9_.-]+$', username):
             raise forms.ValidationError("Username can only contain letters, numbers, dots, and underscores.")
         return username
 
-    def clean(self):
-        cleaned_data = super().clean()
-        pwd = cleaned_data.get('password')
-        confirm_pwd = cleaned_data.get('confirm_password')
-        if pwd and confirm_pwd and pwd != confirm_pwd:
-            raise forms.ValidationError("Passwords do not match. Please re-enter carefully.")
-        if pwd and len(pwd) < 8:
-            raise forms.ValidationError("Password must be at least 8 characters long.")
-        return cleaned_data
+    def clean_phone_number(self):
+        phone = self.cleaned_data.get('phone_number', '').strip()
+        if CustomerProfile.objects.filter(phone_number=phone).exists():
+            raise forms.ValidationError("This mobile number is already registered with another customer.")
+        return phone
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email', '').strip()
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("This email is already registered with another user.")
+        return email
 
 
 class ForgotPasswordStep1Form(forms.Form):
@@ -123,17 +176,10 @@ class ForgotPasswordStep1Form(forms.Form):
         max_length=150,
         widget=forms.TextInput(attrs={
             'class': 'form-control form-control-lg',
-            'placeholder': 'Username or CIF Number',
+            'placeholder': 'Enter Username, CIF Number, or Registered Email',
             'id': 'forgot-identifier'
-        })
-    )
-    registered_mobile = forms.CharField(
-        max_length=15,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control form-control-lg',
-            'placeholder': 'Registered 10-digit mobile number',
-            'id': 'forgot-mobile'
-        })
+        }),
+        help_text="We will send a 6-digit password reset OTP to your registered email address"
     )
 
 
@@ -141,11 +187,12 @@ class ForgotPasswordStep2Form(forms.Form):
     otp_code = forms.CharField(
         max_length=6,
         widget=forms.TextInput(attrs={
-            'class': 'form-control form-control-lg text-center tracking-widest font-monospace',
+            'class': 'form-control form-control-lg text-center tracking-widest font-monospace fs-4',
             'placeholder': '••••••',
             'id': 'forgot-otp',
             'maxlength': '6'
-        })
+        }),
+        help_text="Enter the 6-digit OTP code sent to your registered email"
     )
 
 
@@ -194,16 +241,6 @@ class ProfileUpdateForm(forms.ModelForm):
             'pincode': forms.TextInput(attrs={'class': 'form-control'}),
             'profile_photo': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
         }
-
-    def clean_profile_photo(self):
-        photo = self.cleaned_data.get('profile_photo')
-        if photo and hasattr(photo, 'size'):
-            if photo.size > 2 * 1024 * 1024:
-                raise forms.ValidationError("Profile photo size cannot exceed 2MB.")
-            ext = photo.name.split('.')[-1].lower()
-            if ext not in ['jpg', 'jpeg', 'png', 'webp']:
-                raise forms.ValidationError("Only JPG, JPEG, PNG, or WEBP image formats are supported.")
-        return photo
 
 
 class PasswordChangeCustomForm(forms.Form):

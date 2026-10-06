@@ -1,0 +1,61 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+
+{% block title %}Security Audit Logs — PRIME RESERVE BANK{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid p-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold text-prm-navy mb-1 font-heading">Security Audit Trail</h4>
+            <p class="text-secondary small mb-0">Record of your logins, transactions, PIN updates, and security activities</p>
+        </div>
+        <div class="badge bg-success-subtle text-success px-3 py-2 rounded-pill fw-semibold">
+            <i class="bi bi-shield-check me-1"></i> Immutable Activity Log
+        </div>
+    </div>
+
+    <div class="card card-prm p-4 bg-white shadow-sm rounded-4 border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="small text-uppercase">Timestamp</th>
+                        <th class="small text-uppercase">Action</th>
+                        <th class="small text-uppercase">Event Details</th>
+                        <th class="small text-uppercase">IP Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in page_obj %}
+                        <tr>
+                            <td class="font-monospace small text-muted">{{ log.timestamp|date:"d M Y, h:i A" }}</td>
+                            <td><span class="badge bg-light text-dark border">{{ log.action }}</span></td>
+                            <td class="small">{{ log.description }}</td>
+                            <td class="font-monospace small text-muted">{{ log.ip_address|default:"127.0.0.1" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-muted">No security logs recorded yet.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if page_obj.has_other_pages %}
+        <div class="d-flex justify-content-center pt-4">
+            <ul class="pagination pagination-sm mb-0">
+                {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                {% endif %}
+                <li class="page-item active"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+                {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                {% endif %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

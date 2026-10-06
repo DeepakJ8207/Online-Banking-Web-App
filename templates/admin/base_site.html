@@ -7,10 +7,10 @@
 {{ block.super }}
 <style>
     #header {
-        background: #0b1f3a !important;
+        background: linear-gradient(135deg, #0b1f3a 0%, #173860 100%) !important;
         color: #ffffff !important;
         border-bottom: 3px solid #f59e0b;
-        padding: 12px 24px !important;
+        padding: 14px 24px !important;
     }
     #branding h1 {
         margin: 0 !important;
@@ -22,18 +22,18 @@
         color: #f59e0b !important;
         text-decoration: none !important;
     }
-    .custom-admin-nav-banner {
-        background: #ffffff;
-        border-bottom: 1px solid #e2e8f0;
-        padding: 10px 24px;
+    .operations-suite-banner {
+        background: linear-gradient(90deg, #eff6ff 0%, #ffffff 100%);
+        border-bottom: 2px solid #bfdbfe;
+        padding: 14px 24px;
         display: flex;
         flex-wrap: wrap;
         align-items: center;
         justify-content: space-between;
-        gap: 12px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        gap: 16px;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
     }
-    .custom-admin-btn {
+    .ops-pill {
         display: inline-flex;
         align-items: center;
         gap: 6px;
@@ -44,20 +44,30 @@
         text-decoration: none;
         transition: all 0.2s ease;
     }
-    .btn-customer-portal {
-        background-color: #0d6efd;
-        color: #ffffff !important;
-    }
-    .btn-customer-portal:hover {
-        background-color: #0b5ed7;
-    }
-    .btn-manager-overview {
-        background-color: #f59e0b;
+    .ops-pill-primary {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
         color: #0b1f3a !important;
+        box-shadow: 0 2px 6px rgba(245, 158, 11, 0.3);
     }
-    .btn-manager-overview:hover {
-        background-color: #d97706;
+    .ops-pill-primary:hover {
+        background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
         color: #ffffff !important;
+        transform: translateY(-1px);
+    }
+    .ops-pill-blue {
+        background-color: #2563eb;
+        color: #ffffff !important;
+    }
+    .ops-pill-blue:hover {
+        background-color: #1d4ed8;
+    }
+    .ops-pill-light {
+        background-color: #f1f5f9;
+        color: #334155 !important;
+        border: 1px solid #cbd5e1;
+    }
+    .ops-pill-light:hover {
+        background-color: #e2e8f0;
     }
 </style>
 {% endblock %}
@@ -66,27 +76,27 @@
 <div id="branding">
     <h1 id="site-name">
         <a href="{% url 'admin:index' %}">
-            🏛️ PRIME RESERVE BANK — Core Banking Administration
+            🏛️ PRIME RESERVE BANK — Central Database Admin
         </a>
     </h1>
 </div>
 {% endblock %}
 
 {% block nav-global %}
-<div class="custom-admin-nav-banner">
-    <div style="font-size: 0.88rem; color: #334155;">
-        <span style="background: #e2e8f0; color: #0f172a; padding: 2px 8px; border-radius: 4px; font-weight: 600; margin-right: 8px;">QUICK ACCESS</span>
-        Switch to the graphical user and manager portals:
+<div class="operations-suite-banner">
+    <div style="font-size: 0.92rem; color: #1e293b;">
+        <span style="background: #2563eb; color: #ffffff; padding: 3px 10px; border-radius: 12px; font-weight: 700; font-size: 0.75rem; letter-spacing: 0.05em; margin-right: 8px;">RECOMMENDED</span>
+        <strong>Looking for a clean, easy UI to manage Customers, Accounts, FDs, RDs, and Loans?</strong>
     </div>
-    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <a href="{% url 'dashboard:admin_overview' %}" class="custom-admin-btn btn-manager-overview">
-            📊 Bank Manager Overview (Live Balances & Transactions)
+    <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+        <a href="{% url 'admin_dashboard:overview' %}" class="ops-pill ops-pill-primary">
+            🚀 Open Bank Manager Operations Suite (Clean UI)
         </a>
-        <a href="{% url 'dashboard:home' %}" class="custom-admin-btn btn-customer-portal">
-            👤 Customer NetBanking Portal
+        <a href="{% url 'dashboard:home' %}" class="ops-pill ops-pill-blue">
+            👤 Customer NetBanking View
         </a>
-        <a href="/" class="custom-admin-btn" style="background: #f1f5f9; color: #334155 !important;">
-            🌐 Bank Home Page
+        <a href="/" class="ops-pill ops-pill-light">
+            🌐 Bank Home
         </a>
     </div>
 </div>

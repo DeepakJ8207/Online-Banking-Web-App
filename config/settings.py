@@ -56,6 +56,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -174,3 +175,15 @@ DEMO_OTP_DISPLAY = get_env('DEMO_OTP_DISPLAY', 'True').lower() in ('true', '1', 
 
 # Maximum file upload size (2MB)
 MAX_UPLOAD_SIZE = 2 * 1024 * 1024
+
+# Email Backend Configuration (SMTP / Console)
+EMAIL_HOST_USER = get_env('EMAIL_HOST_USER', '').strip()
+EMAIL_HOST_PASSWORD = get_env('EMAIL_HOST_PASSWORD', '').replace(' ', '').strip()
+EMAIL_BACKEND = get_env(
+    'EMAIL_BACKEND',
+    'django.core.mail.backends.smtp.EmailBackend' if (EMAIL_HOST_USER and EMAIL_HOST_PASSWORD) else 'django.core.mail.backends.console.EmailBackend'
+)
+EMAIL_HOST = get_env('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(get_env('EMAIL_PORT', '587'))
+EMAIL_USE_TLS = get_env('EMAIL_USE_TLS', 'True').lower() in ('true', '1', 'yes')
+DEFAULT_FROM_EMAIL = get_env('DEFAULT_FROM_EMAIL', f"PRIME RESERVE BANK <{EMAIL_HOST_USER}>" if EMAIL_HOST_USER else 'PRIME RESERVE BANK <no-reply@primereservebank.demo>')

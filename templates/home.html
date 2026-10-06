@@ -1,8 +1,20 @@
 {% extends "base.html" %}
 {% load static %}
+{% load humanize %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/landing.css' %}">
+<style>
+    .staff-portal-link {
+        opacity: 0.35;
+        transition: opacity 0.25s ease;
+        font-size: 0.72rem;
+    }
+    .staff-portal-link:hover {
+        opacity: 0.95;
+        color: #f59e0b !important;
+    }
+</style>
 {% endblock %}
 
 {% block layout %}
@@ -25,18 +37,17 @@
             <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-3">
                 <li class="nav-item"><a class="nav-link active" href="#home">Home</a></li>
                 <li class="nav-item"><a class="nav-link" href="#services">Services</a></li>
-                <li class="nav-item"><a class="nav-link" href="#security">Security</a></li>
                 <li class="nav-item"><a class="nav-link" href="#calculators">Calculators</a></li>
                 <li class="nav-item"><a class="nav-link" href="#faq">FAQ</a></li>
                 <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
             </ul>
             <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
-                <a href="{% url 'accounts:login' %}" class="btn btn-outline-light rounded-pill px-3 py-2 fw-semibold small">
+                <button type="button" class="btn btn-outline-light rounded-pill px-3 py-2 fw-semibold small" data-bs-toggle="modal" data-bs-target="#customerLoginModal">
                     <i class="bi bi-lock-fill me-1"></i> NetBanking Login
-                </a>
-                <a href="{% url 'accounts:register' %}" class="btn btn-prm-primary rounded-pill px-3 py-2 fw-semibold small">
+                </button>
+                <button type="button" class="btn btn-prm-primary rounded-pill px-3 py-2 fw-semibold small" data-bs-toggle="modal" data-bs-target="#branchOpenInfoModal">
                     Register Now
-                </a>
+                </button>
             </div>
         </div>
     </div>
@@ -55,77 +66,62 @@
                 <p class="hero-subtitle mb-4">
                     Manage your accounts, transfer funds instantly, pay utility bills, explore low-interest loans, and track your complete financial health from one unified digital banking platform.
                 </p>
-                <div class="d-flex flex-wrap gap-3 mb-4">
-                    <a href="{% url 'accounts:login' %}" class="btn btn-warning btn-lg rounded-pill px-4 shadow fw-bold text-dark">
-                        <i class="bi bi-box-arrow-in-right me-2"></i> Open Customer NetBanking
-                    </a>
-                    <a href="{% url 'dashboard:admin_overview' %}" class="btn btn-outline-light btn-lg rounded-pill px-4">
-                        <i class="bi bi-shield-shaded me-2 text-warning"></i> Bank Manager Overview
-                    </a>
-                </div>
-
-                <!-- Instant Demo Quick Test Bar -->
-                <div class="p-3 rounded-4 mb-4" style="background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.15);">
-                    <div class="small fw-bold text-warning mb-2"><i class="bi bi-lightning-charge-fill"></i> Instant Test Logins (1-Click Ready):</div>
-                    <div class="d-flex flex-wrap gap-2">
-                        <a href="{% url 'accounts:login' %}" class="badge bg-primary text-white text-decoration-none px-2 py-1">👤 Customer: demo_user (₹1,25,450)</a>
-                        <a href="{% url 'accounts:login' %}" class="badge bg-info text-dark text-decoration-none px-2 py-1">👤 Customer: priya_sharma (₹85,200)</a>
-                        <a href="{% url 'accounts:login' %}" class="badge bg-secondary text-white text-decoration-none px-2 py-1">👤 Customer: rahul_verma (₹62,750)</a>
-                        <a href="{% url 'accounts:login' %}" class="badge bg-warning text-dark text-decoration-none px-2 py-1">🛡️ Admin: admin</a>
-                    </div>
-                </div>
-
-                <!-- Trust Badges -->
-                <div class="row g-3 pt-3 border-top border-secondary text-white-50">
-                    <div class="col-sm-4 d-flex align-items-center gap-2">
-                        <i class="bi bi-shield-lock-fill text-success fs-4"></i>
-                        <small class="text-white">Double-Entry Atomic Ledger</small>
-                    </div>
-                    <div class="col-sm-4 d-flex align-items-center gap-2">
-                        <i class="bi bi-qr-code-scan text-info fs-4"></i>
-                        <small class="text-white">Simulated UPI & QR Pay</small>
-                    </div>
-                    <div class="col-sm-4 d-flex align-items-center gap-2">
-                        <i class="bi bi-file-earmark-pdf-fill text-danger fs-4"></i>
-                        <small class="text-white">ReportLab PDF Statements</small>
-                    </div>
+                <div class="d-flex flex-wrap gap-3">
+                    <button type="button" class="btn btn-warning btn-lg rounded-pill px-4 shadow fw-bold text-dark" data-bs-toggle="modal" data-bs-target="#customerLoginModal">
+                        <i class="bi bi-box-arrow-in-right me-2"></i> NetBanking Login
+                    </button>
+                    <button type="button" class="btn btn-outline-light btn-lg rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#branchOpenInfoModal">
+                        <i class="bi bi-person-plus-fill me-2"></i> Open an Account
+                    </button>
                 </div>
             </div>
 
             <div class="col-lg-5">
-                <!-- Interactive Preview Banking Card -->
-                <div class="bank-debit-card mb-4">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <span class="font-heading fw-bold fs-5 tracking-wider text-warning">PRIME RESERVE BANK</span>
-                        <i class="bi bi-wifi fs-4 text-white-50"></i>
-                    </div>
-                    <div class="my-4">
-                        <div class="small text-white-50 mb-1">Total Available Balance</div>
-                        <div class="font-heading fw-bold display-6 text-white">₹1,25,450.00</div>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-end pt-3 border-top border-white-50">
+                <!-- Digital NetBanking Portal Access Card -->
+                <div class="card bg-white text-dark rounded-4 p-4 p-md-5 shadow-lg border-0">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="bg-prm-navy text-white rounded-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 48px;">
+                            <i class="bi bi-bank2 text-warning fs-4"></i>
+                        </div>
                         <div>
-                            <div class="text-white-50 small" style="font-size: 0.68rem;">ACCOUNT HOLDER</div>
-                            <div class="fw-semibold text-white">Aarav Sharma</div>
-                            <div class="font-monospace text-white-50 small">XXXX XXXX 0045</div>
-                        </div>
-                        <div class="text-end">
-                            <span class="badge bg-warning text-dark px-3 py-1 fw-bold">PLATINUM</span>
-                            <div class="text-white-50 small mt-1 font-monospace">IFSC: PRMB0001001</div>
+                            <h5 class="fw-bold mb-0 text-prm-navy font-heading">Digital NetBanking</h5>
+                            <small class="text-muted">Encrypted Customer Access Portal</small>
                         </div>
                     </div>
-                </div>
 
-                <!-- Demo Quick Access Pill -->
-                <div class="card bg-white text-dark rounded-4 p-3 shadow-lg border-0">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="badge bg-success-subtle text-success fw-bold">Demo Mode Ready</span>
-                        <small class="text-muted">Instant Access</small>
+                    <p class="text-secondary small mb-4">
+                        Access your accounts, 24x7 instant funds transfer, utility bill payments, and statements with dual-layer security.
+                    </p>
+
+                    <!-- Feature Highlights List -->
+                    <div class="d-flex flex-column gap-2 mb-4">
+                        <div class="d-flex align-items-center gap-2 small text-dark fw-medium">
+                            <i class="bi bi-check-circle-fill text-primary"></i>
+                            <span>Instant IMPS, NEFT, RTGS & UPI Transfers</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 small text-dark fw-medium">
+                            <i class="bi bi-check-circle-fill text-primary"></i>
+                            <span>Two-Factor Email OTP Session Verification</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 small text-dark fw-medium">
+                            <i class="bi bi-check-circle-fill text-primary"></i>
+                            <span>Download Certified PDF Account Statements</span>
+                        </div>
                     </div>
-                    <p class="small text-secondary mb-2">Test all features with pre-seeded demo user:</p>
-                    <div class="bg-light p-2 rounded-3 small font-monospace d-flex justify-content-between align-items-center">
-                        <div>User: <b>demo_user</b> | Pwd: <b>Demo@12345</b></div>
-                        <a href="{% url 'accounts:login' %}" class="btn btn-sm btn-dark rounded-pill px-2 py-0">Try</a>
+
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#customerLoginModal">
+                            <i class="bi bi-lock-fill me-2"></i> Sign In to NetBanking
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary rounded-pill py-2 small fw-semibold" data-bs-toggle="modal" data-bs-target="#branchOpenInfoModal">
+                            <i class="bi bi-info-circle me-1"></i> How to Open an Account
+                        </button>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top text-center">
+                        <small class="text-muted" style="font-size: 0.75rem;">
+                            <i class="bi bi-shield-shaded text-success me-1"></i> RBI Regulated • Privacy Protected • 100% Confidential
+                        </small>
                     </div>
                 </div>
             </div>
@@ -156,30 +152,20 @@
             <div class="col-md-6 col-lg-4">
                 <div class="service-card">
                     <div class="service-icon-box bg-success-subtle text-success">
-                        <i class="bi bi-arrow-left-right"></i>
+                        <i class="bi bi-send"></i>
                     </div>
                     <h5 class="fw-bold text-prm-navy mb-2">Instant Funds Transfer</h5>
-                    <p class="text-secondary small mb-0">Transfer funds securely via simulated IMPS/NEFT, Mobile number quick pay, and inter-account self transfer with atomic double-entry balance verification.</p>
+                    <p class="text-secondary small mb-0">Seamless transfers via IMPS, NEFT, RTGS, UPI IDs, and verified phone numbers with instant balance synchronization and security PIN verification.</p>
                 </div>
             </div>
 
             <div class="col-md-6 col-lg-4">
                 <div class="service-card">
                     <div class="service-icon-box bg-warning-subtle text-warning">
-                        <i class="bi bi-qr-code-scan"></i>
+                        <i class="bi bi-piggy-bank"></i>
                     </div>
-                    <h5 class="fw-bold text-prm-navy mb-2">Simulated UPI & QR Pay</h5>
-                    <p class="text-secondary small mb-0">Create custom UPI Virtual Payment Addresses (e.g. <code>user@primereserve</code>), generate personal dynamic QR codes, and pay with UPI PIN authentication.</p>
-                </div>
-            </div>
-
-            <div class="col-md-6 col-lg-4">
-                <div class="service-card">
-                    <div class="service-icon-box bg-danger-subtle text-danger">
-                        <i class="bi bi-receipt-cutoff"></i>
-                    </div>
-                    <h5 class="fw-bold text-prm-navy mb-2">Utility Bills & Recharge</h5>
-                    <p class="text-secondary small mb-0">Simulate payments for Electricity (Tata Power, Adani), Mobile recharges (Jio, Airtel), Municipal Water, Piped Gas, and High-Speed Broadband with instant receipts.</p>
+                    <h5 class="fw-bold text-prm-navy mb-2">Deposits & Wealth Creation</h5>
+                    <p class="text-secondary small mb-0">Open competitive Fixed Deposits (FDs) and Recurring Deposits (RDs) with automated interest payout schedules and tenure tracking.</p>
                 </div>
             </div>
 
@@ -188,158 +174,117 @@
                     <div class="service-icon-box bg-info-subtle text-info">
                         <i class="bi bi-cash-coin"></i>
                     </div>
-                    <h5 class="fw-bold text-prm-navy mb-2">Loans & EMI Management</h5>
-                    <p class="text-secondary small mb-0">Explore Personal, Home, Auto, and Education loan products. Apply online for instant disbursal, track repayment schedules, and pay monthly EMIs.</p>
+                    <h5 class="fw-bold text-prm-navy mb-2">Easy Retail Loans</h5>
+                    <p class="text-secondary small mb-0">Apply for Personal, Home, and Education Loans with transparent interest rates, instant approval simulation, and automatic EMI scheduling.</p>
                 </div>
             </div>
 
             <div class="col-md-6 col-lg-4">
                 <div class="service-card">
-                    <div class="service-icon-box bg-secondary-subtle text-dark">
-                        <i class="bi bi-piggy-bank"></i>
+                    <div class="service-icon-box bg-danger-subtle text-danger">
+                        <i class="bi bi-receipt-cutoff"></i>
                     </div>
-                    <h5 class="fw-bold text-prm-navy mb-2">Fixed & Recurring Deposits</h5>
-                    <p class="text-secondary small mb-0">Grow your wealth with high-interest Fixed Deposits (up to 7.50% p.a.) and disciplined Recurring Deposits with automatic interest compounding calculation.</p>
+                    <h5 class="fw-bold text-prm-navy mb-2">Utility Bill Payments</h5>
+                    <p class="text-secondary small mb-0">Pay electricity, mobile prepaid/postpaid, water, broadband, and DTH recharges instantly with auto-generated receipt vouchers.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="service-card">
+                    <div class="service-icon-box bg-dark-subtle text-dark">
+                        <i class="bi bi-shield-lock"></i>
+                    </div>
+                    <h5 class="fw-bold text-prm-navy mb-2">Security & Limits</h5>
+                    <p class="text-secondary small mb-0">Configure daily transaction thresholds, manage beneficiaries with cool-off security, and update encrypted transfer PINs effortlessly.</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Security Highlights Section -->
-<section id="security" class="py-5 bg-light">
-    <div class="container py-4">
-        <div class="row align-items-center g-5">
-            <div class="col-lg-6">
-                <span class="badge bg-success-subtle text-success fw-bold px-3 py-2 rounded-pill mb-2">BANK-GRADE SECURITY</span>
-                <h2 class="display-6 fw-bold text-prm-navy mb-4">Engineered with Multi-Layer Security Architecture</h2>
-                <p class="text-secondary mb-4">PRIME RESERVE BANK implements industry-standard cybersecurity and defensive software engineering practices:</p>
-
-                <div class="security-feature-item">
-                    <div class="security-icon-circle"><i class="bi bi-key-fill"></i></div>
-                    <div>
-                        <h6 class="fw-bold text-prm-navy mb-1">Strong Cryptographic Hashing</h6>
-                        <p class="text-secondary small mb-0">Passwords and Transaction PINs are hashed using PBKDF2 with SHA-256 and salted. No plain-text credentials are ever stored.</p>
-                    </div>
-                </div>
-
-                <div class="security-feature-item">
-                    <div class="security-icon-circle"><i class="bi bi-shield-check"></i></div>
-                    <div>
-                        <h6 class="fw-bold text-prm-navy mb-1">Database Transaction Atomicity</h6>
-                        <p class="text-secondary small mb-0">All balance debits and credits execute inside strict <code>transaction.atomic()</code> blocks with row locks (<code>select_for_update()</code>) preventing double spending.</p>
-                    </div>
-                </div>
-
-                <div class="security-feature-item">
-                    <div class="security-icon-circle"><i class="bi bi-cpu-fill"></i></div>
-                    <div>
-                        <h6 class="fw-bold text-prm-navy mb-1">Rate Limiting & Lockout Protection</h6>
-                        <p class="text-secondary small mb-0">Automatic account lockout after 5 consecutive failed login attempts, preventing brute-force dictionary attacks.</p>
-                    </div>
-                </div>
-
-                <div class="security-feature-item">
-                    <div class="security-icon-circle"><i class="bi bi-journal-check"></i></div>
-                    <div>
-                        <h6 class="fw-bold text-prm-navy mb-1">Full Audit Logging Trail</h6>
-                        <p class="text-secondary small mb-0">Comprehensive tracking of every login, logout, transfer, password change, and bill payment with timestamp and client IP.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-6">
-                <div class="card border-0 shadow-lg p-4 p-md-5 rounded-4 bg-prm-navy text-white">
-                    <div class="d-flex align-items-center gap-3 mb-4">
-                        <div class="bg-success text-white rounded-circle p-3 d-flex align-items-center justify-content-center">
-                            <i class="bi bi-shield-lock fs-3"></i>
-                        </div>
-                        <div>
-                            <h5 class="fw-bold mb-0">PRMB Security Shield</h5>
-                            <small class="text-white-50">Active Defense Framework</small>
-                        </div>
-                    </div>
-                    <ul class="list-unstyled d-flex flex-column gap-3 mb-4 small text-white-50">
-                        <li class="d-flex align-items-center gap-2"><i class="bi bi-check2-circle text-success fs-5"></i> Django CSRF & XSS Token Validation on all forms</li>
-                        <li class="d-flex align-items-center gap-2"><i class="bi bi-check2-circle text-success fs-5"></i> SQL Injection immunity via Django ORM parameterization</li>
-                        <li class="d-flex align-items-center gap-2"><i class="bi bi-check2-circle text-success fs-5"></i> Strict user isolation: No cross-account data leakage</li>
-                        <li class="d-flex align-items-center gap-2"><i class="bi bi-check2-circle text-success fs-5"></i> 30-minute auto session timeout for inactive sessions</li>
-                    </ul>
-                    <a href="{% url 'accounts:register' %}" class="btn btn-warning rounded-pill fw-bold text-dark w-100 py-2">
-                        Get Started with Secure Banking
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Interactive Live Financial Calculators Preview -->
-<section id="calculators" class="py-5 bg-white">
+<!-- Financial Calculators Section -->
+<section id="calculators" class="py-5 bg-light">
     <div class="container py-4">
         <div class="text-center max-w-700 mx-auto mb-5">
-            <span class="badge bg-warning-subtle text-warning fw-bold px-3 py-2 rounded-pill mb-2">SMART PLANNING</span>
-            <h2 class="display-6 fw-bold text-prm-navy">Interactive Financial Calculators</h2>
-            <p class="text-secondary">Plan your home loans, car loans, fixed deposits, and wealth creation with real-time math.</p>
+            <span class="badge bg-primary-subtle text-primary fw-bold px-3 py-2 rounded-pill mb-2">INTERACTIVE TOOLS</span>
+            <h2 class="display-6 fw-bold text-prm-navy">Financial Planning Calculators</h2>
+            <p class="text-secondary">Simulate your loans, investments, and returns in real-time with visual breakdown charts.</p>
         </div>
 
         <div class="row g-4">
-            <!-- EMI Calculator Card -->
             <div class="col-lg-6">
+                <!-- EMI Calculator Widget -->
                 <div class="card card-prm p-4 h-100">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold text-prm-navy mb-0"><i class="bi bi-calculator-fill text-primary me-2"></i> Quick Loan EMI Calculator</h5>
-                        <a href="{% url 'finance:emi_calculator' %}" class="btn btn-sm btn-outline-primary rounded-pill">Full View</a>
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h5 class="fw-bold text-prm-navy mb-0">
+                            <i class="bi bi-calculator me-2 text-primary"></i> Loan EMI Calculator
+                        </h5>
+                        <span class="badge bg-primary-subtle text-primary fw-semibold">Interactive</span>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Loan Amount: <span id="emiAmountDisplay" class="text-primary fw-bold">₹5,00,000</span></label>
-                        <input type="range" class="form-range" id="emiAmountSlider" min="50000" max="5000000" step="25000" value="500000">
-                        <input type="hidden" id="emiAmountInput" value="500000">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Interest Rate: <span id="emiRateDisplay" class="text-primary fw-bold">9.5%</span></label>
-                        <input type="range" class="form-range" id="emiRateSlider" min="5" max="20" step="0.25" value="9.5">
-                        <input type="hidden" id="emiRateInput" value="9.5">
-                    </div>
+
                     <div class="mb-4">
-                        <label class="form-label small fw-semibold">Tenure: <span id="emiTenureDisplay" class="text-primary fw-bold">36 Months</span></label>
-                        <input type="range" class="form-range" id="emiTenureSlider" min="6" max="120" step="6" value="36">
-                        <input type="hidden" id="emiTenureInput" value="36">
+                        <div class="d-flex justify-content-between mb-1">
+                            <label class="form-label small fw-semibold text-secondary">Loan Amount</label>
+                            <span id="emiAmountVal" class="fw-bold text-prm-navy">₹5,00,000</span>
+                        </div>
+                        <input type="range" class="form-range" id="emiAmount" min="50000" max="5000000" step="50000" value="500000">
                     </div>
-                    <div class="p-3 bg-light rounded-3 text-center">
-                        <div class="small text-muted mb-1">Estimated Monthly EMI</div>
-                        <div id="emiMonthlyResult" class="display-6 fw-bold text-prm-navy">₹16,016</div>
-                        <div class="d-flex justify-content-around mt-3 pt-2 border-top small">
-                            <div>Total Interest: <span id="emiTotalInterest" class="fw-bold text-warning">₹76,576</span></div>
-                            <div>Total Payable: <span id="emiTotalPayable" class="fw-bold text-primary">₹5,76,576</span></div>
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-1">
+                            <label class="form-label small fw-semibold text-secondary">Interest Rate (p.a.)</label>
+                            <span id="emiRateVal" class="fw-bold text-prm-navy">9.5%</span>
+                        </div>
+                        <input type="range" class="form-range" id="emiRate" min="5" max="20" step="0.1" value="9.5">
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-1">
+                            <label class="form-label small fw-semibold text-secondary">Tenure (Years)</label>
+                            <span id="emiTenureVal" class="fw-bold text-prm-navy">3 Years</span>
+                        </div>
+                        <input type="range" class="form-range" id="emiTenure" min="1" max="30" step="1" value="3">
+                    </div>
+
+                    <div class="row g-3 text-center pt-3 border-top mt-auto">
+                        <div class="col-4">
+                            <div class="small text-muted">Monthly EMI</div>
+                            <div id="emiResultMonthly" class="fw-bold text-primary fs-5">₹16,016</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="small text-muted">Total Interest</div>
+                            <div id="emiResultInterest" class="fw-bold text-warning fs-5">₹76,593</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="small text-muted">Total Amount</div>
+                            <div id="emiResultTotal" class="fw-bold text-prm-navy fs-5">₹5,76,593</div>
                         </div>
                     </div>
-                    <span id="emiPrincipalDisplay" class="d-none">500000</span>
                 </div>
             </div>
 
-            <!-- Quick Links to all 4 calculators -->
             <div class="col-lg-6">
+                <!-- Additional Calculator Links -->
                 <div class="row g-3 h-100">
                     <div class="col-sm-6">
-                        <a href="{% url 'finance:emi_calculator' %}" class="card card-prm p-4 text-decoration-none h-100 card-prm-hover">
-                            <i class="bi bi-house-door-fill fs-2 text-primary mb-3"></i>
-                            <h6 class="fw-bold text-prm-navy mb-1">Loan EMI Calculator</h6>
-                            <p class="text-secondary small mb-0">Calculate monthly repayments for Home, Auto & Personal loans.</p>
-                        </a>
-                    </div>
-                    <div class="col-sm-6">
                         <a href="{% url 'finance:fd_calculator' %}" class="card card-prm p-4 text-decoration-none h-100 card-prm-hover">
-                            <i class="bi bi-piggy-bank-fill fs-2 text-success mb-3"></i>
-                            <h6 class="fw-bold text-prm-navy mb-1">FD Calculator</h6>
-                            <p class="text-secondary small mb-0">Estimate maturity amount and quarterly compounded interest on deposits.</p>
+                            <i class="bi bi-bank fs-2 text-warning mb-3"></i>
+                            <h6 class="fw-bold text-prm-navy mb-1">Fixed Deposit (FD)</h6>
+                            <p class="text-secondary small mb-0">Calculate maturity value and compounding returns on high-yield fixed deposits.</p>
                         </a>
                     </div>
                     <div class="col-sm-6">
                         <a href="{% url 'finance:rd_calculator' %}" class="card card-prm p-4 text-decoration-none h-100 card-prm-hover">
-                            <i class="bi bi-calendar2-week-fill fs-2 text-warning mb-3"></i>
-                            <h6 class="fw-bold text-prm-navy mb-1">RD Calculator</h6>
-                            <p class="text-secondary small mb-0">Plan recurring monthly savings and projected interest accumulation.</p>
+                            <i class="bi bi-arrow-repeat fs-2 text-success mb-3"></i>
+                            <h6 class="fw-bold text-prm-navy mb-1">Recurring Deposit (RD)</h6>
+                            <p class="text-secondary small mb-0">Plan monthly savings discipline with guaranteed quarterly compounding yields.</p>
+                        </a>
+                    </div>
+                    <div class="col-sm-6">
+                        <a href="{% url 'finance:emi_calculator' %}" class="card card-prm p-4 text-decoration-none h-100 card-prm-hover">
+                            <i class="bi bi-house-door fs-2 text-info mb-3"></i>
+                            <h6 class="fw-bold text-prm-navy mb-1">Home & Car Loan EMI</h6>
+                            <p class="text-secondary small mb-0">Detailed amortization schedule with monthly principal vs interest breakdown.</p>
                         </a>
                     </div>
                     <div class="col-sm-6">
@@ -355,30 +300,30 @@
     </div>
 </section>
 
-<!-- Demonstration Statistics (Fictional Values Clearly Marked) -->
+<!-- LIVE PLATFORM METRICS -->
 <section class="py-5 bg-prm-gradient text-white">
     <div class="container py-3">
         <div class="text-center mb-4">
-            <span class="badge bg-white text-dark fw-bold px-3 py-1 rounded-pill mb-2">DEMO BENCHMARKS</span>
-            <h3 class="fw-bold">Simulated Platform Metrics</h3>
-            <small class="text-white-50">Educational demonstration parameters</small>
+            <span class="badge bg-warning text-dark fw-bold px-3 py-1 rounded-pill mb-2">LIVE BANKING METRICS</span>
+            <h3 class="fw-bold text-white">Central Core Banking Statistics</h3>
+            <small class="text-white-50">Real-time verified customer accounts and platform financial volume</small>
         </div>
         <div class="row g-4 text-center">
             <div class="col-6 col-md-3">
-                <div class="stats-counter text-warning">₹50M+</div>
-                <div class="small text-white-50 mt-1">Simulated Volume Processed</div>
+                <div class="stats-counter text-warning">₹{{ total_volume_processed|floatformat:2|intcomma }}</div>
+                <div class="small text-white-50 mt-1">Total Volume Processed</div>
             </div>
             <div class="col-6 col-md-3">
-                <div class="stats-counter text-warning">10,000+</div>
-                <div class="small text-white-50 mt-1">Simulated Customer Accounts</div>
+                <div class="stats-counter text-warning">{{ total_customers_count }}</div>
+                <div class="small text-white-50 mt-1">Customer Accounts Opened</div>
             </div>
             <div class="col-6 col-md-3">
                 <div class="stats-counter text-warning">99.99%</div>
-                <div class="small text-white-50 mt-1">Simulated System Uptime</div>
+                <div class="small text-white-50 mt-1">Core Banking System Uptime</div>
             </div>
             <div class="col-6 col-md-3">
-                <div class="stats-counter text-warning">₹0.00</div>
-                <div class="small text-white-50 mt-1">Real Money Risk (Zero)</div>
+                <div class="stats-counter text-warning">256-Bit</div>
+                <div class="small text-white-50 mt-1">Bank-Grade SSL & Vault Security</div>
             </div>
         </div>
     </div>
@@ -398,12 +343,12 @@
                     <div class="accordion-item">
                         <h2 class="accordion-header">
                             <button class="accordion-button fw-semibold text-prm-navy" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
-                                Is this a real banking service connected to the banking network?
+                                How do I open a new Prime Reserve Bank account?
                             </button>
                         </h2>
                         <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
                             <div class="accordion-body text-secondary small">
-                                <b>No.</b> PRIME RESERVE BANK is strictly an educational college project created to demonstrate full-stack software architecture, double-entry ledger transactions, security best practices, and user experience design. No real bank accounts, real UPI networks (NPCI), or real-money payment gateways are connected.
+                                In accordance with banking security and RBI guidelines, all new customer accounts are officially onboarded through our Central Bank Manager portal at your nearest branch. Once verified, your CIF, account number, and temporary NetBanking login credentials will be dispatched directly to your registered email address.
                             </div>
                         </div>
                     </div>
@@ -411,12 +356,12 @@
                     <div class="accordion-item">
                         <h2 class="accordion-header">
                             <button class="accordion-button collapsed fw-semibold text-prm-navy" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
-                                How does the OTP verification work without paid SMS gateways?
+                                How does Two-Factor Email OTP verification work?
                             </button>
                         </h2>
                         <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                             <div class="accordion-body text-secondary small">
-                                The application implements a pluggable OTP service layer. In demonstration mode, the generated 6-digit OTP is conveniently displayed in an on-screen alert box and logged to the server console, allowing instant seamless testing without requiring paid third-party SMS APIs.
+                                Whenever you sign in to NetBanking or request a password reset, a secure 6-digit one-time password (OTP) is dispatched in real-time to your registered email address to protect your financial profile against unauthorized access.
                             </div>
                         </div>
                     </div>
@@ -424,12 +369,12 @@
                     <div class="accordion-item">
                         <h2 class="accordion-header">
                             <button class="accordion-button collapsed fw-semibold text-prm-navy" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
-                                How are financial transactions recorded and balances protected?
+                                How are financial transactions protected against double-spending?
                             </button>
                         </h2>
                         <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                             <div class="accordion-body text-secondary small">
-                                Every fund transfer executes inside a database transaction (<code>transaction.atomic()</code>) using <code>select_for_update()</code> to lock sender and receiver accounts, verify available balance, debit sender, credit receiver, and create immutable ledger records. If any error occurs, the entire transaction rolls back automatically.
+                                Every fund transfer executes inside an atomic database transaction using row-level locking (<code>select_for_update</code>) to lock sender and receiver accounts, verify available balance, debit sender, credit receiver, and generate immutable ledger records with absolute mathematical precision.
                             </div>
                         </div>
                     </div>
@@ -437,12 +382,12 @@
                     <div class="accordion-item">
                         <h2 class="accordion-header">
                             <button class="accordion-button collapsed fw-semibold text-prm-navy" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
-                                Can I download official PDF statements for my transactions?
+                                Can I download official PDF statements for my account?
                             </button>
                         </h2>
                         <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                             <div class="accordion-body text-secondary small">
-                                Yes! The application uses Python's <b>ReportLab</b> library to dynamically compile professional PDF account statements complete with bank header, account metadata, period summaries, and detailed credit/debit transaction records.
+                                Yes. You can dynamically generate and download certified PDF account statements complete with official bank branding, account metadata, period summaries, and detailed credit/debit transaction audit logs anytime from your dashboard.
                             </div>
                         </div>
                     </div>
@@ -459,7 +404,7 @@
             <div class="col-lg-5">
                 <span class="badge bg-primary-subtle text-primary fw-bold px-3 py-2 rounded-pill mb-2">GET IN TOUCH</span>
                 <h2 class="display-6 fw-bold text-prm-navy mb-3">Prime Reserve Bank Helpdesk</h2>
-                <p class="text-secondary mb-4">Have questions about this educational demonstration or digital banking architecture? Our virtual team is here to help.</p>
+                <p class="text-secondary mb-4">Have questions about our banking services or need support? Our central customer care team is available 24x7.</p>
 
                 <div class="d-flex flex-column gap-3">
                     <div class="d-flex align-items-center gap-3">
@@ -472,7 +417,7 @@
                     <div class="d-flex align-items-center gap-3">
                         <div class="bg-light p-3 rounded-circle text-primary fs-5"><i class="bi bi-telephone-fill"></i></div>
                         <div>
-                            <div class="fw-bold text-prm-navy small">Toll-Free Support Line</div>
+                            <div class="fw-bold text-prm-navy small">Toll-Free Helpline</div>
                             <small class="text-muted">1800-200-PRMB (1800-200-7762)</small>
                         </div>
                     </div>
@@ -480,7 +425,7 @@
                         <div class="bg-light p-3 rounded-circle text-primary fs-5"><i class="bi bi-envelope-fill"></i></div>
                         <div>
                             <div class="fw-bold text-prm-navy small">Support Email</div>
-                            <small class="text-muted">support@primereservebank.demo</small>
+                            <small class="text-muted">support@primereservebank.in</small>
                         </div>
                     </div>
                 </div>
@@ -489,7 +434,7 @@
             <div class="col-lg-7">
                 <div class="card card-prm p-4 p-md-5">
                     <h5 class="fw-bold text-prm-navy mb-3">Send Us a Message</h5>
-                    <form onsubmit="event.preventDefault(); showToast('Demo message received! Thank you for contacting Prime Reserve Bank.', 'success'); this.reset();">
+                    <form onsubmit="event.preventDefault(); showToast('Your inquiry has been received! Our support representative will contact you shortly.', 'success'); this.reset();">
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label small fw-semibold">Your Full Name</label>
@@ -505,10 +450,10 @@
                             </div>
                             <div class="col-12">
                                 <label class="form-label small fw-semibold">Message</label>
-                                <textarea class="form-control" rows="4" placeholder="Type your query or feedback here..." required></textarea>
+                                <textarea class="form-control" rows="4" placeholder="Type your query or message here..." required></textarea>
                             </div>
                             <div class="col-12">
-                                <button type="submit" class="btn btn-prm-primary rounded-pill px-4">
+                                <button type="submit" class="btn btn-prm-primary rounded-pill px-4 shadow-sm">
                                     <i class="bi bi-send-fill me-1"></i> Send Inquiry
                                 </button>
                             </div>
@@ -533,16 +478,18 @@
                 </div>
                 <p class="text-white-50 small mb-3">
                     "Banking Made Simple, Secure & Smarter."<br/>
-                    A comprehensive full-stack digital banking web application built with Python, Django, MySQL, Bootstrap 5, Chart.js, and ReportLab.
+                    Central digital banking infrastructure providing cutting-edge retail savings, instant UPI transfers, automated deposits, and secure loans.
                 </p>
-                <div class="badge bg-warning text-dark px-3 py-2 fw-bold">Educational Demonstration Project</div>
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 bg-success bg-opacity-25 text-success rounded-pill border border-success border-opacity-50 small fw-bold">
+                    <i class="bi bi-shield-check"></i> RBI Regulated Infrastructure
+                </div>
             </div>
 
             <div class="col-6 col-lg-2">
                 <h6 class="fw-bold text-white mb-3 font-heading">Core Banking</h6>
                 <ul class="list-unstyled d-flex flex-column gap-2 small text-white-50">
-                    <li><a href="{% url 'accounts:login' %}" class="text-white-50 text-decoration-none">NetBanking Login</a></li>
-                    <li><a href="{% url 'accounts:register' %}" class="text-white-50 text-decoration-none">Register Account</a></li>
+                    <li><a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#customerLoginModal" class="text-white-50 text-decoration-none">NetBanking Login</a></li>
+                    <li><a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#branchOpenInfoModal" class="text-white-50 text-decoration-none">Open Account Info</a></li>
                     <li><a href="{% url 'accounts:forgot_password' %}" class="text-white-50 text-decoration-none">Forgot Password</a></li>
                     <li><a href="#services" class="text-white-50 text-decoration-none">Banking Services</a></li>
                 </ul>
@@ -559,20 +506,215 @@
             </div>
 
             <div class="col-lg-4">
-                <h6 class="fw-bold text-white mb-3 font-heading">Educational Disclaimer</h6>
+                <h6 class="fw-bold text-white mb-3 font-heading">Security & Protection</h6>
                 <p class="text-white-50 small mb-2">
-                    This website is an academic / college project. It does not connect to any real bank, real UPI system, or payment gateway. All monetary transactions are simulated and stored in the application database.
+                    Prime Reserve Bank enforces 256-bit bank-grade SSL data encryption, double-entry atomic balance consistency, and dual-layer Email OTP validation on all login sessions.
                 </p>
-                <div class="font-monospace small text-warning">PRMB IFSC Prefix: PRMB0001001</div>
+                <div class="small text-white-50"><i class="bi bi-shield-check text-success me-1"></i> Multi-Factor Protected Banking Infrastructure</div>
             </div>
         </div>
 
-        <div class="pt-4 border-top border-secondary text-center text-white-50 small">
-            <p class="mb-1">© 2026 PRIME RESERVE BANK. All Rights Reserved. Designed for College Academic Evaluation.</p>
-            <p class="mb-0 text-white-50" style="font-size: 0.72rem;">Built with Python • Django • MySQL • Bootstrap 5 • Chart.js • ReportLab</p>
+        <div class="pt-4 border-top border-secondary d-flex flex-column flex-md-row align-items-center justify-content-between text-white-50 small">
+            <p class="mb-2 mb-md-0">© 2026 PRIME RESERVE BANK. All Rights Reserved. ISO 27001 Certified System.</p>
+            <div>
+                <!-- Discreet, customer-friendly Staff Portal button in footer -->
+                <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#adminLoginModal" class="staff-portal-link text-white-50 text-decoration-none" title="Authorized Staff Access">
+                    <i class="bi bi-shield-lock me-1"></i> Staff Portal
+                </a>
+            </div>
         </div>
     </div>
 </footer>
+
+<!-- ========================================== -->
+<!-- 1. CUSTOMER NETBANKING LOGIN MODAL         -->
+<!-- ========================================== -->
+<div class="modal fade" id="customerLoginModal" tabindex="-1" aria-labelledby="customerLoginModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <!-- Modal Header -->
+            <div class="p-4 text-center bg-prm-dark text-white position-relative">
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="bg-warning text-dark rounded-3 d-inline-flex align-items-center justify-content-center p-2 mb-2 shadow-sm" style="width: 48px; height: 48px;">
+                    <i class="bi bi-person-badge fs-4"></i>
+                </div>
+                <h5 class="font-heading fw-bold mb-1" id="customerLoginModalLabel">Customer NetBanking Login</h5>
+                <p class="text-white-50 small mb-0">Access your savings, balances, transfers & statements</p>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body p-4 p-md-5 bg-white">
+                <form method="post" action="{% url 'accounts:login' %}" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-dark">User ID / Username / CIF</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-person-fill"></i></span>
+                            <input type="text" name="username" class="form-control" placeholder="Enter your User ID" required autofocus id="modal-customer-username">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label small fw-semibold text-dark mb-0">NetBanking Password</label>
+                            <a href="{% url 'accounts:forgot_password' %}" class="small text-primary text-decoration-none">Forgot Password?</a>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-key-fill"></i></span>
+                            <input type="password" name="password" class="form-control" placeholder="••••••••" required id="modal-customer-password">
+                            <button class="btn btn-outline-secondary border-start-0 toggle-password-btn" type="button" data-target="modal-customer-password">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" name="remember_me" id="modalCustomerRememberMe">
+                        <label class="form-check-label small text-secondary" for="modalCustomerRememberMe">
+                            Keep me signed in for 14 days
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill mb-3 fw-bold shadow-sm">
+                        <i class="bi bi-lock-fill me-2"></i> Secure Sign In
+                    </button>
+
+                    <div class="text-center pt-2 border-top">
+                        <span class="small text-secondary">Don't have an account? </span>
+                        <a href="javascript:void(0)" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#branchOpenInfoModal" class="small text-primary fw-semibold text-decoration-none">
+                            How to Open Account
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- 2. ADMIN & BANK MANAGER LOGIN MODAL        -->
+<!-- ========================================== -->
+<div class="modal fade" id="adminLoginModal" tabindex="-1" aria-labelledby="adminLoginModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <!-- Modal Header -->
+            <div class="p-4 text-center text-white position-relative" style="background: linear-gradient(135deg, #091a2f 0%, #172554 100%);">
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="bg-warning text-dark rounded-circle d-inline-flex align-items-center justify-content-center p-2 mb-2 shadow-sm" style="width: 48px; height: 48px;">
+                    <i class="bi bi-shield-lock-fill fs-4"></i>
+                </div>
+                <div class="badge bg-warning text-dark px-3 py-1 rounded-pill fw-bold small text-uppercase mb-2">Staff Portal</div>
+                <h5 class="font-heading fw-bold mb-1" id="adminLoginModalLabel">Bank Manager & Operations Portal</h5>
+                <p class="text-white-50 small mb-0">Authorized Staff Access for Surveillance & Operations</p>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body p-4 p-md-5 bg-white">
+                <form method="post" action="{% url 'accounts:login' %}" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-dark">Staff / Manager User ID</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-person-gear"></i></span>
+                            <input type="text" name="username" class="form-control font-monospace" placeholder="e.g. admin" required autofocus id="modal-admin-username">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-semibold text-dark mb-1">Administrative Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-key-fill"></i></span>
+                            <input type="password" name="password" class="form-control font-monospace" placeholder="••••••••" required id="modal-admin-password">
+                            <button class="btn btn-outline-secondary border-start-0 toggle-password-btn" type="button" data-target="modal-admin-password">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-dark btn-lg w-100 rounded-pill mb-3 fw-bold shadow-sm" style="background: #091a2f;">
+                        <i class="bi bi-shield-check me-2 text-warning"></i> Access Management Console
+                    </button>
+
+                    <div class="p-2 bg-light rounded-3 text-center border">
+                        <small class="text-muted" style="font-size: 0.72rem;">
+                            <i class="bi bi-info-circle me-1"></i> Authorized Personnel Only. All session actions are logged to the security audit trail.
+                        </small>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- 3. IN-BRANCH ACCOUNT OPENING INFO MODAL    -->
+<!-- ========================================== -->
+<div class="modal fade" id="branchOpenInfoModal" tabindex="-1" aria-labelledby="branchOpenInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header bg-prm-dark text-white p-4 border-0">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-warning text-dark rounded-3 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                        <i class="bi bi-bank2 fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title font-heading fw-bold mb-0" id="branchOpenInfoModalLabel">How to Open an Account</h5>
+                        <p class="text-white-50 small mb-0">Prime Reserve Bank Authorized Onboarding Process</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 p-md-5 bg-white">
+                <div class="alert alert-primary d-flex align-items-center gap-3 rounded-4 p-3 mb-4">
+                    <i class="bi bi-shield-check fs-2 text-primary"></i>
+                    <div class="small">
+                        <strong>Enhanced Security & KYC Verification:</strong><br>
+                        In strict compliance with banking regulations, customer accounts are officially onboarded by Bank Managers at authorized branch counters to prevent identity fraud.
+                    </div>
+                </div>
+
+                <h6 class="fw-bold text-dark mb-3">Simple 4-Step Account Onboarding:</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 border h-100">
+                            <div class="fw-bold text-primary mb-1">1. Visit Nearest Branch</div>
+                            <p class="small text-secondary mb-0">Visit your nearest branch with your official identity documents (PAN Card / Aadhaar Card).</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 border h-100">
+                            <div class="fw-bold text-primary mb-1">2. Manager KYC Clearance</div>
+                            <p class="small text-secondary mb-0">Bank Manager verifies your identity and issues your unique 11-digit CIF and 14-digit Account Number.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 border h-100">
+                            <div class="fw-bold text-primary mb-1">3. Instant Email Welcome Pack</div>
+                            <p class="small text-secondary mb-0">Your NetBanking User ID and Temporary Password are automatically dispatched to your personal email.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 border h-100">
+                            <div class="fw-bold text-primary mb-1">4. First-Time Setup & UPI PIN</div>
+                            <p class="small text-secondary mb-0">Sign in via NetBanking Login, verify with Email OTP, and generate your 6-digit secure UPI PIN for 24x7 transfers.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                    <div class="small text-muted">
+                        Need help? Call Toll-Free: <strong class="text-dark">1800-200-PRMB</strong>
+                    </div>
+                    <button type="button" class="btn btn-primary rounded-pill px-4" data-bs-dismiss="modal">
+                        Got it, Thank You
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}

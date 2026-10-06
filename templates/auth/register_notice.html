@@ -1,0 +1,76 @@
+{% extends "base_auth.html" %}
+{% load static %}
+
+{% block title %}Account Registration Policy — PRIME RESERVE BANK{% endblock %}
+
+{% block auth_content %}
+<div class="col-md-10 col-lg-8">
+    <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+        <!-- Header Banner -->
+        <div class="p-4 text-center text-white" style="background: linear-gradient(135deg, #0b1f3a 0%, #173860 100%);">
+            <div class="bg-warning text-dark rounded-3 d-inline-flex align-items-center justify-content-center p-2 mb-2 shadow-sm" style="width: 48px; height: 48px;">
+                <i class="bi bi-bank2 fs-4"></i>
+            </div>
+            <h4 class="font-heading fw-bold mb-1">Branch-Authorized Account Opening</h4>
+            <p class="text-white-50 small mb-0">Prime Reserve Bank Core Banking & Security Policy</p>
+        </div>
+
+        <div class="card-body p-4 p-md-5 bg-white">
+            <div class="text-center mb-4">
+                <div class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill fw-semibold mb-2">
+                    <i class="bi bi-info-circle me-1"></i> In-Branch Account Opening Only
+                </div>
+                <h5 class="fw-bold text-dark">Customer Accounts are Registered by Bank Branch Officers</h5>
+                <p class="text-secondary small mx-auto" style="max-width: 580px;">
+                    For banking compliance and customer safety, self-service public registration is disabled. All new bank accounts must be initialized by a Prime Reserve Bank Branch Manager.
+                </p>
+            </div>
+
+            <!-- 4-Step Process Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-sm-6 col-md-3">
+                    <div class="p-3 bg-light rounded-4 border text-center h-100 shadow-sm">
+                        <div class="badge bg-primary text-white rounded-circle p-2 mb-2" style="width: 36px; height: 36px; line-height: 20px;">1</div>
+                        <h6 class="fw-bold text-dark mb-1 small">Visit Branch</h6>
+                        <p class="text-muted mb-0" style="font-size: 0.75rem;">Submit KYC details at any authorized branch office.</p>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-md-3">
+                    <div class="p-3 bg-light rounded-4 border text-center h-100 shadow-sm">
+                        <div class="badge bg-primary text-white rounded-circle p-2 mb-2" style="width: 36px; height: 36px; line-height: 20px;">2</div>
+                        <h6 class="fw-bold text-dark mb-1 small">Admin Registers</h6>
+                        <p class="text-muted mb-0" style="font-size: 0.75rem;">Bank officer opens account & registers customer in system.</p>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-md-3">
+                    <div class="p-3 bg-light rounded-4 border text-center h-100 shadow-sm">
+                        <div class="badge bg-primary text-white rounded-circle p-2 mb-2" style="width: 36px; height: 36px; line-height: 20px;">3</div>
+                        <h6 class="fw-bold text-dark mb-1 small">Email Credentials</h6>
+                        <p class="text-muted mb-0" style="font-size: 0.75rem;">Account Number, CIF, and Login Password sent to your email.</p>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-md-3">
+                    <div class="p-3 bg-light rounded-4 border text-center h-100 shadow-sm">
+                        <div class="badge bg-success text-white rounded-circle p-2 mb-2" style="width: 36px; height: 36px; line-height: 20px;">4</div>
+                        <h6 class="fw-bold text-dark mb-1 small">Login & UPI PIN</h6>
+                        <p class="text-muted mb-0" style="font-size: 0.75rem;">Login with Email OTP & generate 4-digit UPI PIN on first login.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex flex-column flex-sm-row justify-content-center gap-3 pt-2">
+                <a href="{% url 'accounts:login' %}" class="btn btn-primary btn-lg rounded-pill px-4 fw-bold shadow-sm">
+                    <i class="bi bi-box-arrow-in-right me-2"></i> Go to Internet Banking Login
+                </a>
+                <a href="{% url 'accounts:login' %}" class="btn btn-outline-secondary btn-lg rounded-pill px-4">
+                    <i class="bi bi-shield-lock me-2"></i> Bank Staff / Admin Portal
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
