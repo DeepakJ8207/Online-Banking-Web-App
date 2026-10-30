@@ -123,8 +123,57 @@ class AdminCustomerRegistrationForm(forms.Form):
         help_text="Account credentials & login OTP will be sent to this email address"
     )
     phone_number = forms.CharField(
-        max_length=15,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 9876543210', 'id': 'adm-phone'})
+        max_length=10,
+        min_length=10,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': '10-digit mobile number',
+            'id': 'adm-phone',
+            'maxlength': '10',
+            'pattern': r'[0-9]{10}',
+            'inputmode': 'numeric',
+            'oninput': "this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);"
+        }),
+        error_messages={
+            'max_length': 'Mobile number cannot exceed 10 digits.',
+            'min_length': 'Mobile number must be exactly 10 digits.',
+            'required': 'Mobile number is required.'
+        }
+    )
+    gender = forms.ChoiceField(
+        choices=CustomerProfile.GENDER_CHOICES,
+        required=False,
+        initial='MALE',
+        widget=forms.Select(attrs={'class': 'form-select', 'id': 'adm-gender'})
+    )
+    address = forms.CharField(
+        max_length=255,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Flat / House No., Street, Area', 'id': 'adm-address'}),
+        label="Residential Address"
+    )
+    city = forms.CharField(
+        max_length=50,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Mumbai', 'id': 'adm-city'})
+    )
+    state = forms.CharField(
+        max_length=50,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Maharashtra', 'id': 'adm-state'})
+    )
+    pincode = forms.CharField(
+        max_length=10,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'e.g. 400001',
+            'id': 'adm-pincode',
+            'maxlength': '6',
+            'pattern': r'[0-9]{6}',
+            'inputmode': 'numeric',
+            'oninput': "this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);"
+        })
     )
     branch = forms.ModelChoiceField(
         queryset=Branch.objects.all(),
@@ -160,9 +209,14 @@ class AdminCustomerRegistrationForm(forms.Form):
 
     def clean_phone_number(self):
         phone = self.cleaned_data.get('phone_number', '').strip()
-        if CustomerProfile.objects.filter(phone_number=phone).exists():
+        digits = re.sub(r'\D', '', phone)
+        if len(digits) != 10:
+            raise forms.ValidationError("Mobile number must be exactly 10 digits (no more, no less).")
+        if not re.match(r'^[6-9]\d{9}$', digits):
+            raise forms.ValidationError("Please enter a valid 10-digit mobile number starting with 6, 7, 8, or 9.")
+        if CustomerProfile.objects.filter(phone_number=digits).exists():
             raise forms.ValidationError("This mobile number is already registered with another customer.")
-        return phone
+        return digits
 
     def clean_email(self):
         email = self.cleaned_data.get('email', '').strip()
@@ -227,20 +281,45 @@ class ProfileUpdateForm(forms.ModelForm):
     first_name = forms.CharField(max_length=30, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
     last_name = forms.CharField(max_length=30, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
     email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    phone_number = forms.CharField(
+        max_length=10,
+        min_length=10,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'maxlength': '10',
+            'placeholder': '10-digit mobile number',
+            'pattern': r'[0-9]{10}',
+            'inputmode': 'numeric',
+            'oninput': "this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);"
+        }),
+        error_messages={
+            'max_length': 'Mobile number cannot exceed 10 digits.',
+            'min_length': 'Mobile number must be exactly 10 digits.',
+        }
+    )
 
     class Meta:
         model = CustomerProfile
-        fields = ['phone_number', 'date_of_birth', 'gender', 'address', 'city', 'state', 'pincode', 'profile_photo']
+        fields = ['phone_number', 'date_of_birth', 'profile_photo']
         widgets = {
-            'phone_number': forms.TextInput(attrs={'class': 'form-control'}),
             'date_of_birth': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'gender': forms.Select(attrs={'class': 'form-select'}),
-            'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            'city': forms.TextInput(attrs={'class': 'form-control'}),
-            'state': forms.TextInput(attrs={'class': 'form-control'}),
-            'pincode': forms.TextInput(attrs={'class': 'form-control'}),
             'profile_photo': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
         }
+
+    def clean_phone_number(self):
+        phone = self.cleaned_data.get('phone_number', '').strip()
+        digits = re.sub(r'\D', '', phone)
+        if len(digits) != 10:
+            raise forms.ValidationError("Mobile number must be exactly 10 digits.")
+        if not re.match(r'^[6-9]\d{9}$', digits):
+            raise forms.ValidationError("Please enter a valid 10-digit mobile number starting with 6, 7, 8, or 9.")
+        qs = CustomerProfile.objects.filter(phone_number=digits)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError("This mobile number is already registered with another customer.")
+        return digits
 
 
 class PasswordChangeCustomForm(forms.Form):
@@ -262,4 +341,42 @@ class PasswordChangeCustomForm(forms.Form):
             raise forms.ValidationError("New passwords do not match.")
         if p1 and len(p1) < 8:
             raise forms.ValidationError("Password must be at least 8 characters long.")
+        return cleaned
+
+
+class ChangePasswordViaOTPForm(forms.Form):
+    otp_code = forms.CharField(
+        max_length=6,
+        min_length=6,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control text-center font-monospace fs-4 tracking-widest',
+            'placeholder': '••••••',
+            'maxlength': '6',
+            'pattern': '[0-9]{6}',
+            'inputmode': 'numeric',
+            'autocomplete': 'one-time-code',
+            'autofocus': 'autofocus'
+        }),
+        label="Enter 6-Digit Email OTP"
+    )
+    new_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'New Password'}),
+        label="New Password"
+    )
+    confirm_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirm New Password'}),
+        label="Confirm New Password"
+    )
+
+    def clean(self):
+        cleaned = super().clean()
+        p1 = cleaned.get('new_password')
+        p2 = cleaned.get('confirm_password')
+        if p1 and p2 and p1 != p2:
+            raise forms.ValidationError("New passwords do not match.")
+        if p1 and len(p1) < 8:
+            raise forms.ValidationError("Password must be at least 8 characters long.")
+        otp = cleaned.get('otp_code')
+        if otp and not (len(otp) == 6 and otp.isdigit()):
+            raise forms.ValidationError("OTP code must be 6 numeric digits.")
         return cleaned

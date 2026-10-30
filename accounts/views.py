@@ -13,7 +13,7 @@ from .models import CustomerProfile, Branch, OTPVerification, LoginAttempt, Audi
 from .forms import (
     UserLoginForm, LoginOTPForm, FirstTimeSetupForm,
     ForgotPasswordStep1Form, ForgotPasswordStep2Form, ForgotPasswordStep3Form,
-    ProfileUpdateForm, PasswordChangeCustomForm
+    ProfileUpdateForm, PasswordChangeCustomForm, ChangePasswordViaOTPForm
 )
 from .services import log_audit_event, send_notification, OTPService
 from banking.models import BankAccount
@@ -34,8 +34,10 @@ def home_view(request):
 
     total_customers_count = BankAccount.objects.values('user').distinct().count()
     total_accounts_count = BankAccount.objects.count()
-    total_deposits = BankAccount.objects.filter(status='ACTIVE').aggregate(s=Sum('balance'))['s'] or Decimal('0.00')
-    total_tx_volume = Transaction.objects.filter(status='SUCCESS').aggregate(s=Sum('amount'))['s'] or Decimal('0.00')
+    raw_deposits = BankAccount.objects.filter(status='ACTIVE').aggregate(s=Sum('balance'))['s'] or Decimal('0.00')
+    total_deposits = Decimal(f"{float(raw_deposits):.2f}")
+    raw_tx = Transaction.objects.filter(status='SUCCESS').aggregate(s=Sum('amount'))['s'] or Decimal('0.00')
+    total_tx_volume = Decimal(f"{float(raw_tx):.2f}")
     total_volume_processed = total_deposits + total_tx_volume
     branches_count = Branch.objects.count()
 
@@ -208,7 +210,6 @@ def login_otp_view(request):
         'form': form,
         'user': user,
         'masked_email': masked_email,
-        'demo_otp': demo_otp
     })
 
 
@@ -389,7 +390,6 @@ def forgot_password_view(request):
         'form2': ForgotPasswordStep2Form(),
         'form3': ForgotPasswordStep3Form(),
         'masked_email': masked_email,
-        'demo_otp': request.session.get('demo_forgot_otp')
     })
 
 
@@ -409,31 +409,11 @@ def profile_view(request):
 @login_required
 def update_profile_view(request):
     """
-    Update Customer Profile details (phone, address, photo).
+    Profile information is officially maintained and locked by the bank branch.
+    Online modification is disabled for banking security.
     """
-    profile = get_object_or_404(CustomerProfile, user=request.user)
-    
-    if request.method == 'POST':
-        form = ProfileUpdateForm(request.POST, request.FILES, instance=profile)
-        if form.is_valid():
-            # Update User First/Last Name and Email
-            request.user.first_name = form.cleaned_data['first_name']
-            request.user.last_name = form.cleaned_data['last_name']
-            request.user.email = form.cleaned_data['email']
-            request.user.save(update_fields=['first_name', 'last_name', 'email'])
-            
-            form.save()
-            log_audit_event("PROFILE_UPDATE", "User updated personal profile details", user=request.user, request=request)
-            messages.success(request, "Profile updated successfully!")
-            return redirect('accounts:profile')
-    else:
-        form = ProfileUpdateForm(instance=profile, initial={
-            'first_name': request.user.first_name,
-            'last_name': request.user.last_name,
-            'email': request.user.email
-        })
-    
-    return render(request, 'profile/update_profile.html', {'form': form})
+    messages.info(request, "Official KYC and profile details are maintained by Prime Reserve Bank branch and cannot be modified online.")
+    return redirect('accounts:profile')
 
 
 @login_required
@@ -464,6 +444,73 @@ def change_password_view(request):
 
 
 @login_required
+def change_password_forgot_view(request):
+    """
+    Allow authenticated user to reset login password via Email OTP if they don't know current password.
+    """
+    user = request.user
+    masked_email = user.profile.masked_email() if hasattr(user, 'profile') else user.email
+
+    # Resend OTP Action
+    if request.method == 'POST' and request.POST.get('action') == 'resend_otp':
+        OTPService.generate_and_dispatch(
+            purpose='PASSWORD_RESET',
+            user=user,
+            email=user.email,
+            phone_number=user.profile.phone_number if hasattr(user, 'profile') else '',
+            request=request
+        )
+        messages.success(request, f"New OTP verification code sent to {masked_email}")
+        return redirect('accounts:change_password_forgot')
+
+    # Initial dispatch on fresh entry
+    if request.method == 'GET':
+        OTPService.generate_and_dispatch(
+            purpose='PASSWORD_RESET',
+            user=user,
+            email=user.email,
+            phone_number=user.profile.phone_number if hasattr(user, 'profile') else '',
+            request=request
+        )
+        messages.info(request, f"Security OTP dispatched to your registered email: {masked_email}")
+
+    if request.method == 'POST':
+        form = ChangePasswordViaOTPForm(request.POST)
+        if form.is_valid():
+            otp_code = form.cleaned_data['otp_code']
+            new_pwd = form.cleaned_data['new_password']
+
+            is_valid, msg = OTPService.verify_otp(
+                purpose='PASSWORD_RESET',
+                otp_code=otp_code,
+                user=user,
+                email=user.email
+            )
+            if not is_valid:
+                messages.error(request, msg)
+            else:
+                user.set_password(new_pwd)
+                user.save()
+                update_session_auth_hash(request, user)
+                if hasattr(user, 'profile'):
+                    user.profile.failed_login_count = 0
+                    user.profile.is_locked = False
+                    user.profile.save(update_fields=['failed_login_count', 'is_locked'])
+
+                log_audit_event("PASSWORD_CHANGE", "Reset account password via OTP", user=user, request=request)
+                send_notification(user, "Password Reset Successful", "Your password has been reset successfully using OTP.", "SECURITY")
+                messages.success(request, "Account password has been updated successfully!")
+                return redirect('accounts:profile')
+    else:
+        form = ChangePasswordViaOTPForm()
+
+    return render(request, 'profile/change_password_otp.html', {
+        'form': form,
+        'masked_email': masked_email,
+    })
+
+
+@login_required
 def notifications_view(request):
     """
     View all notifications & mark read.
@@ -491,3 +538,215 @@ def audit_logs_view(request):
     page_obj = paginator.get_page(page_number)
 
     return render(request, 'profile/audit_logs.html', {'page_obj': page_obj})
+
+
+@login_required
+def link_account_view(request):
+    """
+    Step 1: Authenticate credentials for another account and dispatch OTP.
+    """
+    if request.method == 'POST':
+        linked_ids = request.session.get('linked_user_ids', [])
+        if request.user.id not in linked_ids:
+            linked_ids = [request.user.id] + [uid for uid in linked_ids if uid != request.user.id]
+            request.session['linked_user_ids'] = linked_ids[:4]
+
+        if len(linked_ids) >= 4:
+            messages.error(request, "Maximum of 4 linked accounts reached. Please logout or remove an account first.")
+            return redirect('banking:my_account')
+
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+
+        if not username or not password:
+            messages.error(request, "Please enter both User ID / Username and Password to link an account.")
+            return redirect('banking:my_account')
+
+        auth_user = authenticate(request, username=username, password=password)
+
+        if auth_user is None:
+            user_exists = User.objects.filter(username__iexact=username).first()
+            if user_exists and hasattr(user_exists, 'profile') and user_exists.profile.is_locked:
+                messages.error(request, f"The account '{username}' is locked due to too many failed attempts.")
+            else:
+                messages.error(request, "Invalid username or password. Could not link account.")
+            return redirect('banking:my_account')
+
+        if not auth_user.is_active:
+            messages.error(request, f"The account '{username}' is inactive.")
+            return redirect('banking:my_account')
+
+        if auth_user.id in linked_ids:
+            messages.warning(request, f"Account '{auth_user.get_full_name() or auth_user.username}' is already linked.")
+            return redirect('banking:my_account')
+
+        # Dispatch OTP to target account's registered email
+        otp_obj = OTPService.generate_and_dispatch(
+            purpose='LINK_ACCOUNT',
+            user=auth_user,
+            email=auth_user.email,
+            request=request
+        )
+
+        request.session['link_pending_user_id'] = auth_user.id
+        request.session['link_switch_now'] = request.POST.get('switch_now') in ('1', 'true', 'on')
+
+        masked = auth_user.profile.masked_email() if hasattr(auth_user, 'profile') else auth_user.email
+        messages.info(request, f"Verification OTP code sent to registered email {masked}.")
+        return redirect('accounts:link_account_otp')
+
+    return redirect('banking:my_account')
+
+
+@login_required
+def link_account_otp_view(request):
+    """
+    Step 2: Verify 6-digit Email OTP before linking account into multi-session.
+    """
+    target_user_id = request.session.get('link_pending_user_id')
+    if not target_user_id:
+        return redirect('banking:my_account')
+
+    target_user = User.objects.filter(id=target_user_id).first()
+    if not target_user:
+        request.session.pop('link_pending_user_id', None)
+        request.session.pop('link_switch_now', None)
+        return redirect('banking:my_account')
+
+    masked_email = target_user.profile.masked_email() if hasattr(target_user, 'profile') else target_user.email
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'resend':
+            OTPService.generate_and_dispatch(
+                purpose='LINK_ACCOUNT',
+                user=target_user,
+                email=target_user.email,
+                request=request
+            )
+            messages.success(request, f"A fresh OTP has been sent to {masked_email}.")
+            return redirect('accounts:link_account_otp')
+
+        if action == 'cancel':
+            request.session.pop('link_pending_user_id', None)
+            request.session.pop('link_switch_now', None)
+            messages.info(request, "Account linking cancelled.")
+            return redirect('banking:my_account')
+
+        otp_code = request.POST.get('otp_code', '').strip()
+        if not otp_code:
+            messages.error(request, "Please enter the 6-digit OTP code.")
+            return render(request, 'account/link_account_otp.html', {
+                'target_user': target_user,
+                'masked_email': masked_email,
+            })
+
+        is_valid, msg = OTPService.verify_otp(
+            purpose='LINK_ACCOUNT',
+            otp_code=otp_code,
+            user=target_user,
+            email=target_user.email
+        )
+
+        if is_valid:
+            linked_ids = request.session.get('linked_user_ids', [])
+            if request.user.id not in linked_ids:
+                linked_ids = [request.user.id] + [uid for uid in linked_ids if uid != request.user.id]
+            if target_user.id not in linked_ids:
+                linked_ids.append(target_user.id)
+            linked_ids = linked_ids[:4]
+
+            switch_now = request.session.get('link_switch_now', True)
+            request.session.pop('link_pending_user_id', None)
+            request.session.pop('link_switch_now', None)
+
+            cif_no = target_user.profile.cif_number if hasattr(target_user, 'profile') else 'N/A'
+
+            if switch_now:
+                login(request, target_user)
+                request.session['linked_user_ids'] = linked_ids
+                log_audit_event("ACCOUNT_LINK_AND_SWITCH", f"Linked and switched to account {target_user.username}", user=target_user, request=request)
+                messages.success(request, f"Account for {target_user.get_full_name() or target_user.username} (CIF: {cif_no}) verified, linked, and switched successfully!")
+            else:
+                request.session['linked_user_ids'] = linked_ids
+                log_audit_event("ACCOUNT_LINKED", f"Linked additional account {target_user.username}", user=request.user, request=request)
+                messages.success(request, f"Account for {target_user.get_full_name() or target_user.username} (CIF: {cif_no}) verified and linked successfully!")
+
+            return redirect('banking:my_account')
+        else:
+            messages.error(request, msg)
+
+    return render(request, 'account/link_account_otp.html', {
+        'target_user': target_user,
+        'masked_email': masked_email,
+    })
+
+
+@login_required
+def switch_account_view(request, user_id):
+    """
+    Switch active session to another linked account from the dropdown or account hub.
+    """
+    linked_ids = request.session.get('linked_user_ids', [])
+    if request.user.id not in linked_ids:
+        linked_ids.append(request.user.id)
+        request.session['linked_user_ids'] = linked_ids[:4]
+
+    if user_id not in linked_ids:
+        messages.error(request, "Target account is not in your linked accounts session.")
+        return redirect('banking:my_account')
+
+    target_user = get_object_or_404(User, id=user_id)
+    if not target_user.is_active:
+        messages.error(request, "Target account is inactive.")
+        return redirect('banking:my_account')
+
+    if target_user.id == request.user.id:
+        return redirect('banking:my_account')
+
+    preserved_linked_ids = list(linked_ids)
+    login(request, target_user)
+    request.session['linked_user_ids'] = preserved_linked_ids
+
+    cif_no = target_user.profile.cif_number if hasattr(target_user, 'profile') else 'N/A'
+    log_audit_event("ACCOUNT_SWITCH", f"Switched session to {target_user.username}", user=target_user, request=request)
+    messages.success(request, f"Switched active account to {target_user.get_full_name() or target_user.username} (CIF: {cif_no}).")
+
+    next_url = request.GET.get('next')
+    if next_url:
+        return redirect(next_url)
+    return redirect('banking:my_account')
+
+
+@login_required
+def remove_linked_account_view(request, user_id):
+    """
+    Logout or remove a specific account from the multi-account session.
+    """
+    linked_ids = [uid for uid in request.session.get('linked_user_ids', []) if uid != user_id]
+
+    target_user = User.objects.filter(id=user_id).first()
+    target_name = (target_user.get_full_name() or target_user.username) if target_user else "Account"
+
+    if request.user.id == user_id:
+        # Logging out the CURRENT active account
+        if linked_ids:
+            # Switch to first remaining linked account
+            next_user = User.objects.filter(id=linked_ids[0]).first()
+            if next_user and next_user.is_active:
+                login(request, next_user)
+                request.session['linked_user_ids'] = linked_ids
+                log_audit_event("ACCOUNT_LOGOUT_SWITCH", f"Logged out {target_name}, switched to {next_user.username}", user=next_user, request=request)
+                messages.info(request, f"Logged out of {target_name}. Switched active session to {next_user.get_full_name() or next_user.username}.")
+                return redirect('banking:my_account')
+
+        # No other linked accounts left -> logout completely
+        log_audit_event("LOGOUT", f"User logged out of {target_name}.", user=request.user, request=request)
+        logout(request)
+        messages.info(request, f"Logged out of {target_name}.")
+        return redirect('accounts:login')
+    else:
+        # Removing another linked account from this multi-session
+        request.session['linked_user_ids'] = linked_ids
+        messages.success(request, f"Account {target_name} logged out and removed from session.")
+        return redirect('banking:my_account')

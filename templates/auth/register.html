@@ -196,12 +196,6 @@
                             <p class="text-secondary small">We have sent a 6-digit OTP to your registered mobile <b>{{ reg_mobile }}</b>.</p>
                         </div>
 
-                        {% if demo_otp %}
-                            <div class="alert alert-warning py-2 small mb-3">
-                                <i class="bi bi-shield-check text-success me-1"></i> Verification OTP: <b>{{ demo_otp }}</b>
-                            </div>
-                        {% endif %}
-
                         <form method="post" action="{% url 'accounts:register' %}">
                             {% csrf_token %}
                             <div class="mb-4 text-center">

@@ -16,10 +16,6 @@
                     <p class="text-secondary small">Set or change 4-digit security PIN for Account <b>{{ account.masked_account_number }}</b></p>
                 </div>
 
-                <div class="alert alert-info py-2 small mb-4">
-                    <i class="bi bi-info-circle me-1"></i> Default demo transaction PIN is <b>1234</b>.
-                </div>
-
                 <form method="post">
                     {% csrf_token %}
                     <div class="mb-3">

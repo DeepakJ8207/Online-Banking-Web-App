@@ -18,12 +18,6 @@
     <div class="row justify-content-center">
         <div class="col-lg-7">
             <div class="card card-prm p-4 p-md-5 bg-white">
-                <div class="alert alert-info py-2 small mb-4">
-                    <i class="bi bi-info-circle me-1"></i> <b>Demo UPI Handles:</b><br/>
-                    • Priya Patel: <code>priya@primereserve</code><br/>
-                    • Rahul Verma: <code>rahul@primereserve</code>
-                </div>
-
                 <form method="post">
                     {% csrf_token %}
                     <div class="mb-3">
@@ -45,10 +39,7 @@
                         </div>
                     </div>
                     <div class="mb-4 p-3 bg-light rounded-3">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <label class="form-label small fw-bold text-prm-navy mb-0">UPI PIN</label>
-                            <small class="text-muted">Demo UPI PIN: <b>1234</b></small>
-                        </div>
+                        <label class="form-label small fw-bold text-prm-navy mb-1">UPI PIN</label>
                         {{ form.upi_pin }}
                     </div>
                     <div class="d-flex justify-content-between">

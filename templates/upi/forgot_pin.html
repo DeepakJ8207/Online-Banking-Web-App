@@ -1,0 +1,82 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+
+{% block title %}Forgot UPI PIN — PRIME RESERVE BANK{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid p-0">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-5">
+            <div class="card card-prm p-4 p-md-5 bg-white text-center shadow-sm">
+                <div class="bg-warning-subtle text-warning rounded-circle p-3 d-inline-flex mx-auto mb-2" style="width: 60px; height: 60px; align-items: center; justify-content: center;">
+                    <i class="bi bi-shield-lock-fill fs-3"></i>
+                </div>
+                <h4 class="fw-bold text-prm-navy mb-1">Forgot UPI PIN</h4>
+                <p class="text-secondary small mb-3">Reset 4-digit UPI PIN for <b>{{ upi_obj.upi_id }}</b></p>
+
+                <div class="mb-3 text-center">
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill fs-7">
+                        <i class="bi bi-envelope-fill me-1"></i> OTP sent to: <strong>{{ masked_email }}</strong>
+                    </span>
+                </div>
+
+                <form method="post" action="{% url 'upi:forgot_pin' upi_obj.upi_id %}">
+                    {% csrf_token %}
+
+                    <div class="mb-3 text-start">
+                        <label class="form-label small fw-bold">Enter 6-Digit Email OTP</label>
+                        {{ form.otp_code }}
+                        {% if form.otp_code.errors %}
+                            <div class="text-danger small mt-1">{{ form.otp_code.errors.0 }}</div>
+                        {% endif %}
+                        <div class="d-flex justify-content-between align-items-center mt-1">
+                            <span class="text-muted small">Code valid for 5 minutes</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 text-start">
+                        <label class="form-label small fw-bold">New 4-Digit UPI PIN</label>
+                        {{ form.new_pin }}
+                        {% if form.new_pin.errors %}
+                            <div class="text-danger small mt-1">{{ form.new_pin.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4 text-start">
+                        <label class="form-label small fw-bold">Confirm New 4-Digit UPI PIN</label>
+                        {{ form.confirm_new_pin }}
+                        {% if form.confirm_new_pin.errors %}
+                            <div class="text-danger small mt-1">{{ form.confirm_new_pin.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger py-2 small mb-3 text-start">{{ form.non_field_errors.0 }}</div>
+                    {% endif %}
+
+                    <div class="d-grid gap-2 mb-3">
+                        <button type="submit" class="btn btn-warning text-dark fw-bold rounded-pill py-2 shadow-sm">
+                            <i class="bi bi-check-circle-fill me-1"></i> Verify & Reset UPI PIN
+                        </button>
+                    </div>
+                </form>
+
+                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                    <form method="post" action="{% url 'upi:forgot_pin' upi_obj.upi_id %}" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="resend_otp">
+                        <button type="submit" class="btn btn-link btn-sm text-decoration-none p-0 text-primary">
+                            <i class="bi bi-arrow-repeat me-1"></i> Resend Code
+                        </button>
+                    </form>
+                    <a href="{% url 'upi:change_pin' upi_obj.upi_id %}" class="btn btn-link btn-sm text-decoration-none p-0 text-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Reset UPI PIN
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

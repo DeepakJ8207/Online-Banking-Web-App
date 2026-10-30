@@ -63,6 +63,7 @@
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold">Mobile Number</label>
                             {{ form.mobile_number }}
+                            {% if form.mobile_number.errors %}<div class="text-danger small mt-1">{{ form.mobile_number.errors.0 }}</div>{% endif %}
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold">Email Address</label>

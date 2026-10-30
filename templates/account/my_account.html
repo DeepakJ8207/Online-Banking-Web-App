@@ -11,10 +11,93 @@
             <h4 class="fw-bold text-prm-navy mb-1 font-heading">My Bank Accounts</h4>
             <p class="text-secondary small mb-0">Overview of all active savings, current, and deposit accounts</p>
         </div>
-        <div>
+        <div class="d-flex gap-2">
+            {% if can_add_more_accounts %}
+                <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#linkAccountModal">
+                    <i class="bi bi-person-plus-fill me-1"></i> Link Another Account ({{ linked_accounts_count }}/4)
+                </button>
+            {% else %}
+                <span class="badge bg-secondary-subtle text-secondary py-2 px-3 border rounded-pill">
+                    <i class="bi bi-shield-check me-1"></i> Max 4 Accounts Linked
+                </span>
+            {% endif %}
             <a href="{% url 'transfers:self_transfer' %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
                 <i class="bi bi-arrow-left-right me-1"></i> Self Transfer
             </a>
+        </div>
+    </div>
+
+    <!-- Multi-Account Linked Hub (Max 4 Accounts) -->
+    <div class="card card-prm p-4 mb-4 bg-white">
+        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+            <div>
+                <h5 class="fw-bold text-prm-navy mb-1 font-heading">
+                    <i class="bi bi-people-fill text-primary me-2"></i>Linked Accounts ({{ linked_accounts_count }}/4)
+                </h5>
+                <p class="text-secondary small mb-0">Switch between up to 4 customer accounts or logout specific accounts</p>
+            </div>
+            {% if can_add_more_accounts %}
+                <button class="btn btn-outline-primary btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#linkAccountModal">
+                    <i class="bi bi-plus-lg me-1"></i> Add Account
+                </button>
+            {% endif %}
+        </div>
+
+        <div class="row g-3">
+            {% for la in linked_accounts %}
+            <div class="col-md-6 col-xl-3">
+                <div class="card h-100 border rounded-3 p-3 {% if la.is_current %}border-primary shadow-sm bg-primary bg-opacity-10{% else %}bg-light border-light-subtle{% endif %}">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="bg-prm-navy text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px; font-size: 0.95rem;">
+                            {{ la.full_name|first|upper }}
+                        </div>
+                        {% if la.is_current %}
+                            <span class="badge bg-success text-white px-2 py-1 small"><i class="bi bi-check-circle-fill me-1"></i> Active</span>
+                        {% else %}
+                            <span class="badge bg-secondary-subtle text-secondary px-2 py-1 small">Linked</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="fw-bold text-prm-navy text-truncate mb-0">{{ la.full_name }}</div>
+                    <div class="text-muted small font-monospace" style="font-size: 0.75rem;">CIF: {{ la.cif_number }}</div>
+
+                    <div class="mt-2 py-2 border-top border-bottom small">
+                        <div class="text-secondary" style="font-size: 0.75rem;">Primary A/C: <b>{{ la.primary_account.masked_account_number|default:"No A/C" }}</b></div>
+                        <div class="text-dark fw-bold mt-1" style="font-size: 0.9rem;">₹{{ la.total_balance|floatformat:2|intcomma }}</div>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-3">
+                        {% if not la.is_current %}
+                            <a href="{% url 'accounts:switch_account' la.user_id %}" class="btn btn-sm btn-primary rounded-pill flex-grow-1" style="font-size: 0.78rem;">
+                                <i class="bi bi-arrow-repeat me-1"></i> Switch
+                            </a>
+                        {% else %}
+                            <span class="btn btn-sm btn-outline-success rounded-pill flex-grow-1 disabled" style="font-size: 0.78rem;">
+                                <i class="bi bi-check2 me-1"></i> Current
+                            </span>
+                        {% endif %}
+                        <form method="post" action="{% url 'accounts:remove_linked_account' la.user_id %}" class="d-inline" onsubmit="return confirm('Logout account {{ la.full_name }}?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-2" style="font-size: 0.78rem;" title="Logout / Remove this account">
+                                <i class="bi bi-box-arrow-right"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            {% if can_add_more_accounts %}
+            <div class="col-md-6 col-xl-3">
+                <div class="card h-100 border border-2 border-dashed rounded-3 p-3 text-center d-flex flex-column justify-content-center align-items-center bg-transparent" style="cursor: pointer; min-height: 180px;" data-bs-toggle="modal" data-bs-target="#linkAccountModal">
+                    <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center mb-2" style="width: 44px; height: 44px;">
+                        <i class="bi bi-plus-lg fs-4"></i>
+                    </div>
+                    <div class="fw-bold text-prm-navy small mb-1">Link Another Account</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">Add up to 4 accounts in this session</div>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 
@@ -62,7 +145,7 @@
 
                     <div class="my-3 p-3 bg-light rounded-3">
                         <div class="small text-secondary mb-1">Available Balance</div>
-                        <div class="display-6 fw-bold text-prm-navy font-heading">₹{{ acc.balance|intcomma }}</div>
+                        <div class="display-6 fw-bold text-prm-navy font-heading">₹{{ acc.balance|floatformat:2|intcomma }}</div>
                     </div>
 
                     <div class="row g-2 small text-secondary mb-4">

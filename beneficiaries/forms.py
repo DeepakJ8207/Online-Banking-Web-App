@@ -18,7 +18,14 @@ class BeneficiaryForm(forms.ModelForm):
             'ifsc_code': forms.TextInput(attrs={'class': 'form-control text-uppercase', 'placeholder': 'e.g. PRMB0001001 or SBIN0001234'}),
             'bank_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Bank name'}),
             'nickname': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Optional nickname (e.g. Mom, Landlord)'}),
-            'mobile_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '10-digit mobile number'}),
+            'mobile_number': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '10-digit mobile number',
+                'maxlength': '10',
+                'pattern': r'[0-9]{10}',
+                'inputmode': 'numeric',
+                'oninput': "this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);"
+            }),
             'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'beneficiary@email.com'}),
         }
 
@@ -33,6 +40,15 @@ class BeneficiaryForm(forms.ModelForm):
         if not re.match(r'^[A-Z]{4}0[A-Z0-9]{6}$', ifsc):
             raise forms.ValidationError("Invalid IFSC Code format. Must be 11 alphanumeric characters (e.g. PRMB0001001).")
         return ifsc
+
+    def clean_mobile_number(self):
+        mobile = self.cleaned_data.get('mobile_number', '').strip()
+        if mobile:
+            digits = re.sub(r'\D', '', mobile)
+            if len(digits) != 10:
+                raise forms.ValidationError("Mobile number must be exactly 10 digits.")
+            return digits
+        return mobile
 
     def clean(self):
         cleaned = super().clean()

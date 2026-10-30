@@ -15,14 +15,16 @@ class CreateUPIForm(forms.Form):
         label="Choose UPI Handle"
     )
     upi_pin = forms.CharField(
-        max_length=6,
-        widget=forms.PasswordInput(attrs={'class': 'form-control form-control-lg text-center', 'placeholder': '4 or 6 digit PIN'}),
-        label="Set UPI PIN"
+        max_length=4,
+        min_length=4,
+        widget=forms.PasswordInput(attrs={'class': 'form-control form-control-lg text-center', 'placeholder': 'Enter 4-digit PIN', 'maxlength': '4', 'pattern': '[0-9]{4}', 'inputmode': 'numeric'}),
+        label="Set 4-Digit UPI PIN"
     )
     confirm_upi_pin = forms.CharField(
-        max_length=6,
-        widget=forms.PasswordInput(attrs={'class': 'form-control form-control-lg text-center', 'placeholder': 'Confirm PIN'}),
-        label="Confirm UPI PIN"
+        max_length=4,
+        min_length=4,
+        widget=forms.PasswordInput(attrs={'class': 'form-control form-control-lg text-center', 'placeholder': 'Confirm 4-digit PIN', 'maxlength': '4', 'pattern': '[0-9]{4}', 'inputmode': 'numeric'}),
+        label="Confirm 4-Digit UPI PIN"
     )
 
     def __init__(self, *args, user=None, **kwargs):
@@ -45,25 +47,27 @@ class CreateUPIForm(forms.Form):
         p2 = cleaned.get('confirm_upi_pin')
         if p1 and p2 and p1 != p2:
             raise forms.ValidationError("UPI PINs do not match.")
-        if p1 and not (len(p1) in [4, 6] and p1.isdigit()):
-            raise forms.ValidationError("UPI PIN must be either 4 or 6 digits.")
+        if p1 and not (len(p1) == 4 and p1.isdigit()):
+            raise forms.ValidationError("UPI PIN must be exactly 4 numeric digits.")
         return cleaned
 
 
 class ChangeUPIPINForm(forms.Form):
     old_pin = forms.CharField(
         max_length=6,
-        widget=forms.PasswordInput(attrs={'class': 'form-control text-center', 'placeholder': 'Old UPI PIN'}),
+        widget=forms.PasswordInput(attrs={'class': 'form-control text-center', 'placeholder': 'Enter Current UPI PIN', 'inputmode': 'numeric'}),
         label="Current UPI PIN"
     )
     new_pin = forms.CharField(
-        max_length=6,
-        widget=forms.PasswordInput(attrs={'class': 'form-control text-center', 'placeholder': 'New 4/6 digit PIN'}),
-        label="New UPI PIN"
+        max_length=4,
+        min_length=4,
+        widget=forms.PasswordInput(attrs={'class': 'form-control text-center', 'placeholder': 'Enter 4-Digit PIN', 'maxlength': '4', 'pattern': '[0-9]{4}', 'inputmode': 'numeric'}),
+        label="New 4-Digit UPI PIN"
     )
     confirm_new_pin = forms.CharField(
-        max_length=6,
-        widget=forms.PasswordInput(attrs={'class': 'form-control text-center', 'placeholder': 'Confirm New PIN'}),
+        max_length=4,
+        min_length=4,
+        widget=forms.PasswordInput(attrs={'class': 'form-control text-center', 'placeholder': 'Confirm 4-Digit PIN', 'maxlength': '4', 'pattern': '[0-9]{4}', 'inputmode': 'numeric'}),
         label="Confirm New UPI PIN"
     )
 
@@ -73,6 +77,60 @@ class ChangeUPIPINForm(forms.Form):
         p2 = cleaned.get('confirm_new_pin')
         if p1 and p2 and p1 != p2:
             raise forms.ValidationError("New UPI PINs do not match.")
-        if p1 and not (len(p1) in [4, 6] and p1.isdigit()):
-            raise forms.ValidationError("New UPI PIN must be 4 or 6 numeric digits.")
+        if p1 and not (len(p1) == 4 and p1.isdigit()):
+            raise forms.ValidationError("New UPI PIN must be exactly 4 numeric digits.")
+        return cleaned
+
+
+class ForgotUPIPINForm(forms.Form):
+    otp_code = forms.CharField(
+        max_length=6,
+        min_length=6,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control text-center font-monospace fs-4 tracking-widest',
+            'placeholder': '••••••',
+            'maxlength': '6',
+            'pattern': '[0-9]{6}',
+            'inputmode': 'numeric',
+            'autocomplete': 'one-time-code',
+            'autofocus': 'autofocus'
+        }),
+        label="Enter 6-Digit Email OTP"
+    )
+    new_pin = forms.CharField(
+        max_length=4,
+        min_length=4,
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control text-center',
+            'placeholder': 'Enter 4-Digit PIN',
+            'maxlength': '4',
+            'pattern': '[0-9]{4}',
+            'inputmode': 'numeric'
+        }),
+        label="New 4-Digit UPI PIN"
+    )
+    confirm_new_pin = forms.CharField(
+        max_length=4,
+        min_length=4,
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control text-center',
+            'placeholder': 'Confirm 4-Digit PIN',
+            'maxlength': '4',
+            'pattern': '[0-9]{4}',
+            'inputmode': 'numeric'
+        }),
+        label="Confirm New UPI PIN"
+    )
+
+    def clean(self):
+        cleaned = super().clean()
+        p1 = cleaned.get('new_pin')
+        p2 = cleaned.get('confirm_new_pin')
+        if p1 and p2 and p1 != p2:
+            raise forms.ValidationError("New UPI PINs do not match.")
+        if p1 and not (len(p1) == 4 and p1.isdigit()):
+            raise forms.ValidationError("New UPI PIN must be exactly 4 numeric digits.")
+        otp = cleaned.get('otp_code')
+        if otp and not (len(otp) == 6 and otp.isdigit()):
+            raise forms.ValidationError("OTP code must be 6 numeric digits.")
         return cleaned

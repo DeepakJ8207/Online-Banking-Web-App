@@ -11,7 +11,7 @@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
             <h3 class="fw-bold text-prm-navy mb-1 font-heading">
-                {{ greeting }}, {{ user.get_full_name|default:user.username }}!
+                <span id="dashboardGreeting">{{ greeting }}</span>, {{ user.get_full_name|default:user.username }}!
             </h3>
             <div class="d-flex flex-wrap align-items-center gap-2 small text-secondary">
                 <span>Customer ID: <strong class="text-prm-navy">{{ user.profile.cif_number|default:"98765432101" }}</strong></span>
@@ -43,7 +43,7 @@
                     <span class="badge bg-warning text-dark fw-bold">{{ primary_account.get_account_type_display|default:"Savings" }}</span>
                 </div>
                 <div class="display-6 fw-bold mb-2 font-heading text-white">
-                    ₹{{ primary_account.balance|default:"0.00"|intcomma }}
+                    ₹{{ primary_account.balance|default:"0.00"|floatformat:2|intcomma }}
                 </div>
                 <div class="d-flex justify-content-between align-items-center small text-white-50 border-top border-white-50 pt-2">
                     <span class="font-monospace">{{ primary_account.masked_account_number|default:"XXXX XXXX 0045" }}</span>
@@ -65,7 +65,7 @@
                         <i class="bi bi-arrow-down-left"></i>
                     </div>
                 </div>
-                <h3 class="fw-bold text-success mb-1 font-heading">+₹{{ monthly_credits|intcomma }}</h3>
+                <h3 class="fw-bold text-success mb-1 font-heading">+₹{{ monthly_credits|floatformat:2|intcomma }}</h3>
                 <small class="text-muted"><i class="bi bi-calendar3 me-1"></i> Current Month Inflow</small>
             </div>
         </div>
@@ -79,7 +79,7 @@
                         <i class="bi bi-arrow-up-right"></i>
                     </div>
                 </div>
-                <h3 class="fw-bold text-danger mb-1 font-heading">-₹{{ monthly_debits|intcomma }}</h3>
+                <h3 class="fw-bold text-danger mb-1 font-heading">-₹{{ monthly_debits|floatformat:2|intcomma }}</h3>
                 <small class="text-muted"><i class="bi bi-credit-card me-1"></i> Total Spending & Transfers</small>
             </div>
         </div>
@@ -94,18 +94,24 @@
                     </div>
                 </div>
                 <div class="fw-bold text-prm-navy font-monospace mb-1 text-truncate" style="font-size: 0.95rem;">
-                    {{ primary_upi.upi_id|default:"demo_user@primereserve" }}
+                    {% if primary_upi %}{{ primary_upi.upi_id }}{% else %}<span class="text-muted fw-normal fs-6">Not Activated</span>{% endif %}
                 </div>
+                {% if primary_upi %}
                 <div class="d-flex gap-2 mt-2">
-                    <button class="btn btn-sm btn-outline-secondary rounded-pill py-0 px-2 small" onclick="copyToClipboard('{{ primary_upi.upi_id|default:"demo_user@primereserve" }}', 'UPI ID copied!')">
+                    <button class="btn btn-sm btn-outline-secondary rounded-pill py-0 px-2 small" onclick="copyToClipboard('{{ primary_upi.upi_id }}', 'UPI ID copied!')">
                         <i class="bi bi-copy me-1"></i> Copy
                     </button>
-                    {% if primary_upi %}
-                        <a href="{% url 'upi:qr_code' primary_upi.upi_id %}" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2 small">
-                            <i class="bi bi-qr-code-scan me-1"></i> QR
-                        </a>
-                    {% endif %}
+                    <a href="{% url 'upi:qr_code' primary_upi.upi_id %}" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2 small">
+                        <i class="bi bi-qr-code-scan me-1"></i> QR
+                    </a>
                 </div>
+                {% else %}
+                <div class="mt-2">
+                    <a href="{% url 'upi:home' %}" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2 small">
+                        <i class="bi bi-plus-circle me-1"></i> Create UPI ID
+                    </a>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -241,9 +247,9 @@
                                     </td>
                                     <td class="text-end font-monospace fw-bold">
                                         {% if txn.sender_account.user == user %}
-                                            <span class="text-danger">-₹{{ txn.amount|intcomma }}</span>
+                                            <span class="text-danger">-₹{{ txn.amount|floatformat:2|intcomma }}</span>
                                         {% else %}
-                                            <span class="text-success">+₹{{ txn.amount|intcomma }}</span>
+                                            <span class="text-success">+₹{{ txn.amount|floatformat:2|intcomma }}</span>
                                         {% endif %}
                                     </td>
                                     <td class="text-center">
@@ -311,4 +317,25 @@
 
 {% block extra_js %}
 <script src="{% static 'js/dashboard_charts.js' %}"></script>
+<script>
+    (function () {
+        try {
+            const hr = new Date().getHours();
+            let greeting = 'Good Morning';
+            if (hr >= 21 || hr < 5) {
+                greeting = 'Good Night';
+            } else if (hr >= 5 && hr < 12) {
+                greeting = 'Good Morning';
+            } else if (hr >= 12 && hr < 17) {
+                greeting = 'Good Afternoon';
+            } else {
+                greeting = 'Good Evening';
+            }
+            const el = document.getElementById('dashboardGreeting');
+            if (el) el.textContent = greeting;
+        } catch (e) {
+            console.error('Greeting update error:', e);
+        }
+    })();
+</script>
 {% endblock %}

@@ -58,9 +58,11 @@ def dashboard_home_view(request):
     if (user.is_staff or user.is_superuser) and not primary_account:
         return redirect('admin_dashboard:overview')
 
-    # Time-based greeting
+    # Time-based greeting (Asia/Kolkata / local time)
     now_hour = timezone.localtime().hour
-    if now_hour < 12:
+    if now_hour >= 21 or now_hour < 5:
+        greeting = "Good Night"
+    elif now_hour < 12:
         greeting = "Good Morning"
     elif now_hour < 17:
         greeting = "Good Afternoon"
@@ -68,22 +70,25 @@ def dashboard_home_view(request):
         greeting = "Good Evening"
 
     # Financial Aggregations
-    total_balance = accounts.aggregate(total=Sum('balance'))['total'] or Decimal('0.00')
+    raw_balance = accounts.aggregate(total=Sum('balance'))['total'] or Decimal('0.00')
+    total_balance = Decimal(f"{float(raw_balance):.2f}")
 
     # Current month credit and debit
     first_day_of_month = timezone.now().date().replace(day=1)
     
-    monthly_credits = Transaction.objects.filter(
+    raw_credits = Transaction.objects.filter(
         receiver_account__user=user,
         timestamp__date__gte=first_day_of_month,
         status='SUCCESS'
     ).aggregate(s=Sum('amount'))['s'] or Decimal('0.00')
+    monthly_credits = Decimal(f"{float(raw_credits):.2f}")
 
-    monthly_debits = Transaction.objects.filter(
+    raw_debits = Transaction.objects.filter(
         sender_account__user=user,
         timestamp__date__gte=first_day_of_month,
         status='SUCCESS'
     ).aggregate(s=Sum('amount'))['s'] or Decimal('0.00')
+    monthly_debits = Decimal(f"{float(raw_debits):.2f}")
 
     # Recent Transactions
     recent_transactions = Transaction.objects.filter(
@@ -216,10 +221,12 @@ def admin_overview_view(request, customer_form=None):
     # 1. Bank Statistics
     total_customers = BankAccount.objects.values('user').distinct().count()
     total_accounts = BankAccount.objects.count()
-    total_deposits = BankAccount.objects.filter(status='ACTIVE').aggregate(total=Sum('balance'))['total'] or Decimal('0.00')
+    raw_deposits = BankAccount.objects.filter(status='ACTIVE').aggregate(total=Sum('balance'))['total'] or Decimal('0.00')
+    total_deposits = Decimal(f"{float(raw_deposits):.2f}")
     
     today_transactions = Transaction.objects.filter(timestamp__date=today, status='SUCCESS')
-    today_volume = today_transactions.aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+    raw_volume = today_transactions.aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+    today_volume = Decimal(f"{float(raw_volume):.2f}")
     today_count = today_transactions.count()
     
     total_transactions_count = Transaction.objects.count()
@@ -272,13 +279,16 @@ def admin_overview_view(request, customer_form=None):
     # 4. Fixed Deposits & Recurring Deposits
     fixed_deposits = FixedDeposit.objects.select_related('user', 'linked_account').order_by('-created_at')[:50]
     recurring_deposits = RecurringDeposit.objects.select_related('user', 'linked_account').order_by('-created_at')[:50]
-    total_fd_volume = FixedDeposit.objects.filter(status='ACTIVE').aggregate(s=Sum('principal_amount'))['s'] or Decimal('0.00')
-    total_rd_volume = RecurringDeposit.objects.filter(status='ACTIVE').aggregate(s=Sum('total_deposit'))['s'] or Decimal('0.00')
+    raw_fd = FixedDeposit.objects.filter(status='ACTIVE').aggregate(s=Sum('principal_amount'))['s'] or Decimal('0.00')
+    total_fd_volume = Decimal(f"{float(raw_fd):.2f}")
+    raw_rd = RecurringDeposit.objects.filter(status='ACTIVE').aggregate(s=Sum('total_deposit'))['s'] or Decimal('0.00')
+    total_rd_volume = Decimal(f"{float(raw_rd):.2f}")
 
     # 5. Loans
     active_loans = Loan.objects.select_related('user', 'loan_product', 'disbursal_account').order_by('-created_at')[:50]
     loan_products = LoanProduct.objects.filter(is_active=True)
-    total_loan_volume = Loan.objects.filter(status='ACTIVE').aggregate(s=Sum('outstanding_balance'))['s'] or Decimal('0.00')
+    raw_loan = Loan.objects.filter(status='ACTIVE').aggregate(s=Sum('outstanding_balance'))['s'] or Decimal('0.00')
+    total_loan_volume = Decimal(f"{float(raw_loan):.2f}")
 
     # 6. Audit Trail Feed
     audit_logs = AuditLog.objects.select_related('user').order_by('-timestamp')[:30]
@@ -335,6 +345,11 @@ def admin_create_customer_view(request):
             username = form.cleaned_data['username'].strip()
             email = form.cleaned_data['email'].strip()
             phone_number = form.cleaned_data['phone_number'].strip()
+            gender = form.cleaned_data.get('gender') or 'MALE'
+            address = (form.cleaned_data.get('address') or '').strip()
+            city = (form.cleaned_data.get('city') or '').strip()
+            state = (form.cleaned_data.get('state') or '').strip()
+            pincode = (form.cleaned_data.get('pincode') or '').strip()
             branch = form.cleaned_data['branch']
             account_type = form.cleaned_data['account_type']
             initial_deposit = form.cleaned_data['initial_deposit']
@@ -355,6 +370,11 @@ def admin_create_customer_view(request):
                 user=user,
                 cif_number=cif_number,
                 phone_number=phone_number,
+                gender=gender,
+                address=address,
+                city=city,
+                state=state,
+                pincode=pincode,
                 kyc_status='VERIFIED',
                 is_internet_banking_active=True,
                 is_first_login=True,
@@ -860,7 +880,7 @@ def admin_analytics_api(request):
             timestamp__date=target_day,
             status='SUCCESS'
         ).aggregate(s=Sum('amount'))['s'] or Decimal('0.00')
-        volume_data.append(float(vol))
+        volume_data.append(round(float(vol), 2))
 
     # Credit vs Debit
     tot_credits = Transaction.objects.filter(transaction_type__in=['DEPOSIT', 'CREDIT', 'SALARY'], status='SUCCESS').aggregate(s=Sum('amount'))['s'] or Decimal('0.00')
@@ -869,8 +889,8 @@ def admin_analytics_api(request):
     return JsonResponse({
         'days_labels': days_labels,
         'volume_data': volume_data,
-        'credit_total': float(tot_credits),
-        'debit_total': float(tot_debits)
+        'credit_total': round(float(tot_credits), 2),
+        'debit_total': round(float(tot_debits), 2)
     })
 
 

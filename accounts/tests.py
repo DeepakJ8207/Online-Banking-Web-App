@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.urls import reverse
-from accounts.models import Branch, CustomerProfile
+from accounts.models import Branch, CustomerProfile, OTPVerification
 from banking.models import BankAccount
 from beneficiaries.models import Beneficiary
 from bills.models import BillerCategory, Biller
@@ -106,7 +106,7 @@ class WebViewsIntegrationTestCase(TestCase):
 
         # Profile & Settings
         self.assertEqual(self.client.get(reverse('accounts:profile')).status_code, 200)
-        self.assertEqual(self.client.get(reverse('accounts:update_profile')).status_code, 200)
+        self.assertEqual(self.client.get(reverse('accounts:update_profile')).status_code, 302)
         self.assertEqual(self.client.get(reverse('accounts:change_password')).status_code, 200)
         self.assertEqual(self.client.get(reverse('accounts:notifications')).status_code, 200)
         self.assertEqual(self.client.get(reverse('accounts:audit_logs')).status_code, 200)
@@ -186,4 +186,63 @@ class WebViewsIntegrationTestCase(TestCase):
 
         self.user.refresh_from_db()
         self.assertTrue(self.user.check_password('UpdatedPass@123'))
+
+    def test_multi_account_link_switch_and_remove(self):
+        # Create second user
+        user2 = User.objects.create_user('user_two', 'user2@bank.demo', 'Pass@12345', first_name='User', last_name='Two')
+        CustomerProfile.objects.create(user=user2, cif_number='88888888888', phone_number='9811223399')
+        BankAccount.objects.create(user=user2, account_number='1111222233334444', branch=self.branch, balance=Decimal('50000.00'))
+
+        self.client.force_login(self.user)
+
+        # 1. Profile update redirects to profile (disabled online)
+        res_prof = self.client.get(reverse('accounts:update_profile'), follow=True)
+        self.assertRedirects(res_prof, reverse('accounts:profile'))
+
+        # 2. Step 1: Submit credentials to link second account -> redirects to OTP
+        res_link = self.client.post(reverse('accounts:link_account'), {
+            'username': 'user_two',
+            'password': 'Pass@12345',
+            'switch_now': '0'
+        }, follow=True)
+        self.assertEqual(res_link.status_code, 200)
+        self.assertEqual(self.client.session.get('link_pending_user_id'), user2.id)
+
+        # 3. Step 2: Verify OTP
+        otp_obj = OTPVerification.objects.filter(purpose='LINK_ACCOUNT', user=user2, is_used=False).latest('created_at')
+        res_otp = self.client.post(reverse('accounts:link_account_otp'), {
+            'otp_code': otp_obj.otp_code
+        }, follow=True)
+        self.assertEqual(res_otp.status_code, 200)
+        self.assertIn(user2.id, self.client.session.get('linked_user_ids', []))
+
+        # 4. Switch account to user2
+        res_switch = self.client.get(reverse('accounts:switch_account', kwargs={'user_id': user2.id}), follow=True)
+        self.assertEqual(res_switch.status_code, 200)
+        self.assertEqual(int(self.client.session['_auth_user_id']), user2.id)
+
+        # 5. Remove linked account
+        res_remove = self.client.post(reverse('accounts:remove_linked_account', kwargs={'user_id': self.user.id}), follow=True)
+        self.assertEqual(res_remove.status_code, 200)
+        self.assertNotIn(self.user.id, self.client.session.get('linked_user_ids', []))
+
+    def test_change_password_forgot_via_otp(self):
+        self.client.force_login(self.user)
+        res_get = self.client.get(reverse('accounts:change_password_forgot'))
+        self.assertEqual(res_get.status_code, 200)
+        self.assertContains(res_get, "Reset Account Password")
+
+        otp_obj = OTPVerification.objects.filter(purpose='PASSWORD_RESET', user=self.user, is_used=False).latest('created_at')
+        res_post = self.client.post(reverse('accounts:change_password_forgot'), {
+            'otp_code': otp_obj.otp_code,
+            'new_password': 'BrandNewPass@2026',
+            'confirm_password': 'BrandNewPass@2026'
+        }, follow=True)
+        self.assertEqual(res_post.status_code, 200)
+        self.assertRedirects(res_post, reverse('accounts:profile'))
+
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password('BrandNewPass@2026'))
+
+
 

@@ -71,9 +71,21 @@ class MobileTransferForm(forms.Form):
         label="Select Source Account"
     )
     mobile_number = forms.CharField(
-        max_length=15,
-        widget=forms.TextInput(attrs={'class': 'form-control form-control-lg', 'placeholder': 'Enter 10-digit registered mobile number'}),
-        label="Recipient Mobile Number"
+        max_length=10,
+        min_length=10,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control form-control-lg',
+            'placeholder': 'Enter 10-digit registered mobile number',
+            'maxlength': '10',
+            'pattern': r'[0-9]{10}',
+            'inputmode': 'numeric',
+            'oninput': "this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);"
+        }),
+        label="Recipient Mobile Number",
+        error_messages={
+            'max_length': 'Mobile number cannot exceed 10 digits.',
+            'min_length': 'Mobile number must be exactly 10 digits.'
+        }
     )
     amount = forms.DecimalField(
         min_value=Decimal('1.00'),
@@ -99,6 +111,13 @@ class MobileTransferForm(forms.Form):
         super().__init__(*args, **kwargs)
         if user:
             self.fields['sender_account'].queryset = BankAccount.objects.filter(user=user, status='ACTIVE')
+
+    def clean_mobile_number(self):
+        mobile = self.cleaned_data.get('mobile_number', '').strip()
+        digits = re.sub(r'\D', '', mobile)
+        if len(digits) != 10:
+            raise forms.ValidationError("Mobile number must be exactly 10 digits.")
+        return digits
 
 
 class UPITransferForm(forms.Form):
@@ -127,8 +146,8 @@ class UPITransferForm(forms.Form):
         label="Remarks"
     )
     upi_pin = forms.CharField(
-        max_length=6,
-        widget=forms.PasswordInput(attrs={'class': 'form-control form-control-lg text-center', 'placeholder': 'Enter UPI PIN'}),
+        max_length=4,
+        widget=forms.PasswordInput(attrs={'class': 'form-control form-control-lg text-center', 'placeholder': 'Enter 4-Digit UPI PIN', 'maxlength': '4', 'pattern': '[0-9]{4}', 'inputmode': 'numeric'}),
         label="UPI PIN"
     )
 

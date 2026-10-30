@@ -40,12 +40,12 @@
 
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
-                            <label class="form-label small fw-bold text-prm-navy">Set 4 or 6-Digit UPI PIN</label>
+                            <label class="form-label small fw-bold text-prm-navy">Set 4-Digit UPI PIN</label>
                             {{ form.upi_pin }}
                             {% if form.upi_pin.errors %}<div class="text-danger small mt-1">{{ form.upi_pin.errors.0 }}</div>{% endif %}
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label small fw-bold text-prm-navy">Confirm UPI PIN</label>
+                            <label class="form-label small fw-bold text-prm-navy">Confirm 4-Digit UPI PIN</label>
                             {{ form.confirm_upi_pin }}
                             {% if form.confirm_upi_pin.errors %}<div class="text-danger small mt-1">{{ form.confirm_upi_pin.errors.0 }}</div>{% endif %}
                         </div>

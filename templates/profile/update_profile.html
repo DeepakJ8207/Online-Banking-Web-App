@@ -40,6 +40,7 @@
                         <div class="col-md-6">
                             <label class="form-label small fw-bold">Mobile Number</label>
                             {{ form.phone_number }}
+                            {% if form.phone_number.errors %}<div class="text-danger small mt-1">{{ form.phone_number.errors.0 }}</div>{% endif %}
                         </div>
                     </div>
 
@@ -48,29 +49,31 @@
                             <label class="form-label small fw-semibold">Date of Birth</label>
                             {{ form.date_of_birth }}
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold">Gender</label>
-                            {{ form.gender }}
-                        </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Residential Street Address</label>
-                        {{ form.address }}
-                    </div>
-
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-4">
-                            <label class="form-label small fw-semibold">City</label>
-                            {{ form.city }}
+                    <!-- Official KYC Information (Branch Controlled) -->
+                    <div class="p-3 mb-4 rounded-3 border bg-light">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="small fw-bold text-dark">
+                                <i class="bi bi-shield-lock-fill text-warning me-1"></i> Official KYC Details (Branch Verified)
+                            </span>
+                            <span class="badge bg-secondary-subtle text-secondary border small">Non-editable</span>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label small fw-semibold">State</label>
-                            {{ form.state }}
+                        <div class="row g-2 small text-secondary">
+                            <div class="col-md-4">
+                                <span class="fw-semibold text-dark">Gender:</span> {{ form.instance.get_gender_display|default:"-" }}
+                            </div>
+                            <div class="col-md-8">
+                                <span class="fw-semibold text-dark">Residential Address:</span>
+                                {% if form.instance.address %}
+                                    {{ form.instance.address }}{% if form.instance.city %}, {{ form.instance.city }}{% endif %}{% if form.instance.state %}, {{ form.instance.state }}{% endif %}{% if form.instance.pincode %} - {{ form.instance.pincode }}{% endif %}
+                                {% else %}
+                                    <span class="text-muted">Not Provided</span>
+                                {% endif %}
+                            </div>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label small fw-semibold">Pincode</label>
-                            {{ form.pincode }}
+                        <div class="form-text small text-muted mt-2" style="font-size: 0.75rem;">
+                            <i class="bi bi-info-circle me-1"></i> Under banking security regulations, Gender and Residential Address can only be modified at your nearest bank branch with physical KYC documentation.
                         </div>
                     </div>
 

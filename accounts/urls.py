@@ -14,6 +14,11 @@ urlpatterns = [
     path('profile/', views.profile_view, name='profile'),
     path('profile/update/', views.update_profile_view, name='update_profile'),
     path('profile/password/', views.change_password_view, name='change_password'),
+    path('profile/password/forgot/', views.change_password_forgot_view, name='change_password_forgot'),
     path('notifications/', views.notifications_view, name='notifications'),
     path('audit-logs/', views.audit_logs_view, name='audit_logs'),
+    path('link-account/', views.link_account_view, name='link_account'),
+    path('link-account/verify-otp/', views.link_account_otp_view, name='link_account_otp'),
+    path('switch-account/<int:user_id>/', views.switch_account_view, name='switch_account'),
+    path('remove-linked-account/<int:user_id>/', views.remove_linked_account_view, name='remove_linked_account'),
 ]

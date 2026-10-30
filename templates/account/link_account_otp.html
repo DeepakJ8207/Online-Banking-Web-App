@@ -1,0 +1,77 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+
+{% block title %}Verify Email OTP — Link Account — PRIME RESERVE BANK{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid p-0">
+    <div class="mb-4">
+        <a href="{% url 'banking:my_account' %}" class="btn btn-sm btn-link text-decoration-none text-secondary p-0">
+            <i class="bi bi-arrow-left me-1"></i> Back to My Bank Accounts
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6 col-xl-5">
+            <div class="card card-prm border-0 shadow-sm bg-white overflow-hidden">
+                <!-- Header Banner -->
+                <div class="p-4 text-center bg-prm-navy text-white">
+                    <div class="bg-warning text-dark rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-2 shadow-sm" style="width: 56px; height: 56px;">
+                        <i class="bi bi-shield-lock-fill fs-3"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1 font-heading">Verify Target Account OTP</h5>
+                    <p class="text-white-50 small mb-0">Two-Factor Security Verification to Link Account</p>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <p class="text-secondary small mb-1">
+                            Linking account for <strong>{{ target_user.get_full_name|default:target_user.username }}</strong>.
+                            We sent a 6-digit verification code to:
+                        </p>
+                        <div class="badge bg-primary bg-opacity-10 text-primary fs-6 px-3 py-2 rounded-pill fw-bold border border-primary border-opacity-25">
+                            <i class="bi bi-envelope-at me-1"></i> {{ masked_email }}
+                        </div>
+                    </div>
+
+                    <form method="post" action="{% url 'accounts:link_account_otp' %}" novalidate>
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label for="link-otp-code" class="form-label small fw-semibold text-dark text-center d-block">Enter 6-Digit Email OTP</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-key"></i></span>
+                                <input type="text" name="otp_code" id="link-otp-code" class="form-control form-control-lg text-center tracking-widest font-monospace fs-4 py-2" placeholder="••••••" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" required autofocus autocomplete="one-time-code">
+                            </div>
+                            <div class="form-text small text-center text-muted mt-2">
+                                Code expires in 10 minutes. Do not share your OTP with anyone.
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill mb-3 fw-bold shadow-sm">
+                            <i class="bi bi-check-circle-fill me-2"></i> Verify & Link Account
+                        </button>
+                    </form>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top small">
+                        <form method="post" action="{% url 'accounts:link_account_otp' %}" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="resend">
+                            <button type="submit" class="btn btn-link btn-sm text-decoration-none text-primary p-0">
+                                <i class="bi bi-arrow-clockwise me-1"></i> Resend Code
+                            </button>
+                        </form>
+                        <form method="post" action="{% url 'accounts:link_account_otp' %}" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="cancel">
+                            <button type="submit" class="btn btn-link btn-sm text-decoration-none text-danger p-0">
+                                Cancel Linking
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

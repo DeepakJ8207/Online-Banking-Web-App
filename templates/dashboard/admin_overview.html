@@ -264,7 +264,7 @@
                             <div class="p-3 bg-white bg-opacity-10 rounded-3 border border-white-50 border-opacity-10">
                                 <small class="text-white-50 text-uppercase d-block" style="font-size: 0.72rem;">Initial Password & Deposit</small>
                                 <span class="badge bg-dark text-warning font-monospace fs-6 px-2 py-1">{{ last_registered_customer.temporary_password }}</span>
-                                <div class="small text-white-50 mt-1">₹{{ last_registered_customer.initial_deposit }} • {{ last_registered_customer.account_type }}</div>
+                                <div class="small text-white-50 mt-1">₹{{ last_registered_customer.initial_deposit|floatformat:2|intcomma }} • {{ last_registered_customer.account_type }}</div>
                             </div>
                         </div>
                         <div class="col-sm-6 col-md-3">
@@ -298,7 +298,7 @@
                             <div class="d-flex justify-content-between align-items-start mb-3">
                                 <div>
                                     <span class="text-secondary small fw-bold text-uppercase">Total Bank Deposits</span>
-                                    <h3 class="fw-bold text-success mb-0 font-heading mt-1">₹{{ total_deposits|intcomma }}</h3>
+                                    <h3 class="fw-bold text-success mb-0 font-heading mt-1">₹{{ total_deposits|floatformat:2|intcomma }}</h3>
                                 </div>
                                 <div class="kpi-icon-box bg-success-subtle text-success">
                                     <i class="bi bi-vault"></i>
@@ -328,7 +328,7 @@
                             <div class="d-flex justify-content-between align-items-start mb-3">
                                 <div>
                                     <span class="text-secondary small fw-bold text-uppercase">Today's Volume</span>
-                                    <h3 class="fw-bold text-info mb-0 font-heading mt-1">₹{{ today_volume|intcomma }}</h3>
+                                    <h3 class="fw-bold text-info mb-0 font-heading mt-1">₹{{ today_volume|floatformat:2|intcomma }}</h3>
                                 </div>
                                 <div class="kpi-icon-box bg-info-subtle text-info">
                                     <i class="bi bi-arrow-left-right"></i>
@@ -407,7 +407,7 @@
                                                     <div class="text-muted font-monospace" style="font-size: 0.7rem;">@{{ acc.user.username }}</div>
                                                 </td>
                                                 <td class="font-monospace fw-bold">{{ acc.account_number }}</td>
-                                                <td class="text-end font-monospace fw-bold text-success">₹{{ acc.balance|intcomma }}</td>
+                                                <td class="text-end font-monospace fw-bold text-success">₹{{ acc.balance|floatformat:2|intcomma }}</td>
                                                 <td>
                                                     {% if acc.status == 'ACTIVE' %}
                                                         <span class="badge bg-success-subtle text-success">Active</span>
@@ -445,7 +445,7 @@
                                                 <td class="font-monospace text-muted">{{ tx.timestamp|time:"H:i:s" }}</td>
                                                 <td><span class="badge bg-light text-dark border">{{ tx.get_transaction_type_display }}</span></td>
                                                 <td class="text-truncate" style="max-width: 160px;">{{ tx.sender_name }} → {{ tx.receiver_name }}</td>
-                                                <td class="text-end font-monospace fw-bold">₹{{ tx.amount|intcomma }}</td>
+                                                <td class="text-end font-monospace fw-bold">₹{{ tx.amount|floatformat:2|intcomma }}</td>
                                             </tr>
                                         {% endfor %}
                                     </tbody>
@@ -510,7 +510,7 @@
                                             <div class="small text-muted font-monospace">{{ acc.branch.ifsc_code }}</div>
                                         </td>
                                         <td class="text-end font-monospace fw-bold text-success fs-6">
-                                            ₹{{ acc.balance|intcomma }}
+                                            ₹{{ acc.balance|floatformat:2|intcomma }}
                                         </td>
                                         <td>
                                             <span class="badge bg-success-subtle text-success"><i class="bi bi-shield-check me-1"></i> VERIFIED</span>
@@ -569,7 +569,7 @@
                                                                         </div>
                                                                         <div class="text-end">
                                                                             <small class="text-muted text-uppercase d-block" style="font-size: 0.72rem;">Available Balance</small>
-                                                                            <span class="fs-5 fw-bold text-success font-monospace">₹{{ acc.balance|intcomma }}</span>
+                                                                            <span class="fs-5 fw-bold text-success font-monospace">₹{{ acc.balance|floatformat:2|intcomma }}</span>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -637,7 +637,7 @@
                                                                 <div class="col-sm-4">
                                                                     <div class="p-3 bg-white rounded-3 border">
                                                                         <small class="text-muted d-block" style="font-size: 0.72rem;">AVAILABLE BALANCE</small>
-                                                                        <span class="fw-bold text-success fs-5 font-monospace">₹{{ acc.balance|intcomma }}</span>
+                                                                        <span class="fw-bold text-success fs-5 font-monospace">₹{{ acc.balance|floatformat:2|intcomma }}</span>
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-sm-4">
@@ -919,7 +919,7 @@
                                             <span class="badge bg-light text-dark border">{{ tx.get_transaction_type_display }}</span>
                                         </td>
                                         <td class="text-end font-monospace fw-bold fs-6">
-                                            ₹{{ tx.amount|intcomma }}
+                                            ₹{{ tx.amount|floatformat:2|intcomma }}
                                         </td>
                                         <td>
                                             {% if tx.status == 'SUCCESS' %}
@@ -968,14 +968,14 @@
                         <div class="col-sm-6 col-xl-3">
                             <div class="p-3 bg-light rounded-3 border">
                                 <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">Active FD Portfolio</small>
-                                <h4 class="fw-bold text-primary mb-0 font-monospace mt-1">₹{{ total_fd_volume|intcomma }}</h4>
+                                <h4 class="fw-bold text-primary mb-0 font-monospace mt-1">₹{{ total_fd_volume|floatformat:2|intcomma }}</h4>
                                 <small class="text-muted">{{ fixed_deposits|length }} Total FDs registered</small>
                             </div>
                         </div>
                         <div class="col-sm-6 col-xl-3">
                             <div class="p-3 bg-light rounded-3 border">
                                 <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">Active RD Monthly Volume</small>
-                                <h4 class="fw-bold text-info mb-0 font-monospace mt-1">₹{{ total_rd_volume|intcomma }}</h4>
+                                <h4 class="fw-bold text-info mb-0 font-monospace mt-1">₹{{ total_rd_volume|floatformat:2|intcomma }}</h4>
                                 <small class="text-muted">{{ recurring_deposits|length }} Active RD plans</small>
                             </div>
                         </div>
@@ -1027,9 +1027,9 @@
                                             <div class="text-muted small">@{{ fd.user.username }}</div>
                                         </td>
                                         <td class="font-monospace">{{ fd.linked_account.masked_account_number }}</td>
-                                        <td class="text-end font-monospace fw-bold text-prm-navy">₹{{ fd.principal_amount|intcomma }}</td>
+                                        <td class="text-end font-monospace fw-bold text-prm-navy">₹{{ fd.principal_amount|floatformat:2|intcomma }}</td>
                                         <td>{{ fd.tenure_months }} Mo @ <span class="badge bg-warning-subtle text-warning fw-bold">{{ fd.interest_rate }}%</span></td>
-                                        <td class="text-end font-monospace fw-bold text-success">₹{{ fd.maturity_amount|intcomma }}</td>
+                                        <td class="text-end font-monospace fw-bold text-success">₹{{ fd.maturity_amount|floatformat:2|intcomma }}</td>
                                         <td>{{ fd.maturity_date|date:"d M Y" }}</td>
                                         <td>
                                             {% if fd.status == 'ACTIVE' %}
@@ -1040,7 +1040,7 @@
                                         </td>
                                         <td class="text-center">
                                             {% if fd.status == 'ACTIVE' %}
-                                                <a href="{% url 'admin_dashboard:close_fd' fd.id %}" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="return confirm('Prematurely close FD {{ fd.fd_number }} and refund ₹{{ fd.principal_amount }} to customer account?')">
+                                                <a href="{% url 'admin_dashboard:close_fd' fd.id %}" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="return confirm('Prematurely close FD {{ fd.fd_number }} and refund ₹{{ fd.principal_amount|floatformat:2|intcomma }} to customer account?')">
                                                     <i class="bi bi-x-circle me-1"></i> Close FD
                                                 </a>
                                             {% else %}
@@ -1088,9 +1088,9 @@
                                             <div class="text-muted small">@{{ rd.user.username }}</div>
                                         </td>
                                         <td class="font-monospace">{{ rd.linked_account.masked_account_number }}</td>
-                                        <td class="font-monospace fw-bold text-dark">₹{{ rd.monthly_deposit|intcomma }}/mo</td>
+                                        <td class="font-monospace fw-bold text-dark">₹{{ rd.monthly_deposit|floatformat:2|intcomma }}/mo</td>
                                         <td>{{ rd.tenure_months }} Months @ <span class="badge bg-info-subtle text-info fw-bold">{{ rd.interest_rate }}%</span></td>
-                                        <td class="text-end font-monospace fw-bold text-success">₹{{ rd.maturity_amount|intcomma }}</td>
+                                        <td class="text-end font-monospace fw-bold text-success">₹{{ rd.maturity_amount|floatformat:2|intcomma }}</td>
                                         <td>
                                             {% if rd.status == 'ACTIVE' %}
                                                 <span class="badge bg-success-subtle text-success">Active</span>
@@ -1137,7 +1137,7 @@
                         <div class="col-sm-6 col-xl-4">
                             <div class="p-3 bg-light rounded-3 border">
                                 <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">Active Outstanding Loan Volume</small>
-                                <h4 class="fw-bold text-danger mb-0 font-monospace mt-1">₹{{ total_loan_volume|intcomma }}</h4>
+                                <h4 class="fw-bold text-danger mb-0 font-monospace mt-1">₹{{ total_loan_volume|floatformat:2|intcomma }}</h4>
                                 <small class="text-muted">{{ active_loans|length }} Active customer loan accounts</small>
                             </div>
                         </div>
@@ -1181,10 +1181,10 @@
                                             <div class="text-muted small">@{{ loan.user.username }}</div>
                                         </td>
                                         <td><span class="badge bg-primary-subtle text-primary fw-bold">{{ loan.loan_product.name }}</span></td>
-                                        <td class="text-end font-monospace fw-bold text-dark">₹{{ loan.principal_amount|intcomma }}</td>
+                                        <td class="text-end font-monospace fw-bold text-dark">₹{{ loan.principal_amount|floatformat:2|intcomma }}</td>
                                         <td>{{ loan.tenure_months }} Mo @ {{ loan.interest_rate }}%</td>
-                                        <td class="font-monospace text-warning fw-bold">₹{{ loan.monthly_emi|intcomma }}/mo</td>
-                                        <td class="text-end font-monospace fw-bold text-danger">₹{{ loan.outstanding_balance|intcomma }}</td>
+                                        <td class="font-monospace text-warning fw-bold">₹{{ loan.monthly_emi|floatformat:2|intcomma }}/mo</td>
+                                        <td class="text-end font-monospace fw-bold text-danger">₹{{ loan.outstanding_balance|floatformat:2|intcomma }}</td>
                                         <td>
                                             {% if loan.status == 'ACTIVE' %}
                                                 <span class="badge bg-success-subtle text-success">Active</span>
@@ -1299,6 +1299,32 @@
                                     <label class="form-label small fw-semibold text-dark">Mobile Number <span class="text-danger">*</span></label>
                                     {{ customer_form.phone_number }}
                                     {% if customer_form.phone_number.errors %}<div class="text-danger small mt-1">{{ customer_form.phone_number.errors.0 }}</div>{% endif %}
+                                    <div class="form-text small text-muted">Must be exactly 10 digits</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-semibold text-dark">Gender <span class="text-danger">*</span></label>
+                                    {{ customer_form.gender }}
+                                    {% if customer_form.gender.errors %}<div class="text-danger small mt-1">{{ customer_form.gender.errors.0 }}</div>{% endif %}
+                                </div>
+                                <div class="col-md-8">
+                                    <label class="form-label small fw-semibold text-dark">Residential Address <span class="text-danger">*</span></label>
+                                    {{ customer_form.address }}
+                                    {% if customer_form.address.errors %}<div class="text-danger small mt-1">{{ customer_form.address.errors.0 }}</div>{% endif %}
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-semibold text-dark">City</label>
+                                    {{ customer_form.city }}
+                                    {% if customer_form.city.errors %}<div class="text-danger small mt-1">{{ customer_form.city.errors.0 }}</div>{% endif %}
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-semibold text-dark">State</label>
+                                    {{ customer_form.state }}
+                                    {% if customer_form.state.errors %}<div class="text-danger small mt-1">{{ customer_form.state.errors.0 }}</div>{% endif %}
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-semibold text-dark">Pincode</label>
+                                    {{ customer_form.pincode }}
+                                    {% if customer_form.pincode.errors %}<div class="text-danger small mt-1">{{ customer_form.pincode.errors.0 }}</div>{% endif %}
                                 </div>
                             </div>
                         </div>
@@ -1391,7 +1417,7 @@
                                 <option value="">-- Choose Active Customer Account --</option>
                                 {% for acc in all_active_accounts %}
                                     <option value="{{ acc.id }}" data-balance="{{ acc.balance }}">
-                                        {{ acc.user.get_full_name|default:acc.user.username }} ({{ acc.account_number }}) — Avail: ₹{{ acc.balance|intcomma }} [{{ acc.branch.branch_name }}]
+                                        {{ acc.user.get_full_name|default:acc.user.username }} ({{ acc.account_number }}) — Avail: ₹{{ acc.balance|floatformat:2|intcomma }} [{{ acc.branch.branch_name }}]
                                     </option>
                                 {% endfor %}
                             </select>
@@ -1498,7 +1524,7 @@
                                 <option value="">-- Choose Active Customer Account --</option>
                                 {% for acc in all_active_accounts %}
                                     <option value="{{ acc.id }}">
-                                        {{ acc.user.get_full_name|default:acc.user.username }} ({{ acc.account_number }}) — Avail: ₹{{ acc.balance|intcomma }} [{{ acc.branch.branch_name }}]
+                                        {{ acc.user.get_full_name|default:acc.user.username }} ({{ acc.account_number }}) — Avail: ₹{{ acc.balance|floatformat:2|intcomma }} [{{ acc.branch.branch_name }}]
                                     </option>
                                 {% endfor %}
                             </select>
@@ -1587,7 +1613,7 @@
                                 <option value="">-- Choose Customer Bank Account for Disbursal --</option>
                                 {% for acc in all_active_accounts %}
                                     <option value="{{ acc.id }}">
-                                        {{ acc.user.get_full_name|default:acc.user.username }} ({{ acc.account_number }}) — Avail: ₹{{ acc.balance|intcomma }} [{{ acc.branch.branch_name }}]
+                                        {{ acc.user.get_full_name|default:acc.user.username }} ({{ acc.account_number }}) — Avail: ₹{{ acc.balance|floatformat:2|intcomma }} [{{ acc.branch.branch_name }}]
                                     </option>
                                 {% endfor %}
                             </select>

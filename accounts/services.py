@@ -64,8 +64,9 @@ class OTPService:
             validity_minutes=10
         )
 
-        # In this educational project, we display demo OTP and log it to console
+        # In this educational project, log OTP to console / terminal
         logger.info(f"[PRIME RESERVE BANK DEMO OTP] Purpose: {purpose} | Destination: {phone_number or email} | OTP Code: {otp_obj.otp_code}")
+        print(f"\n[DEMO TERMINAL OTP] >>> Purpose: {purpose} | Destination: {phone_number or email} | OTP Code: {otp_obj.otp_code} <<<\n", flush=True)
 
         # Send email OTP
         if email:
